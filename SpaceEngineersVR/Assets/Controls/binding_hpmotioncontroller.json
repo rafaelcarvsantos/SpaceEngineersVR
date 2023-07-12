@@ -116,7 +116,7 @@
             {
                "inputs" : {
                   "position" : {
-                     "output" : "/actions/flying/in/thrustrotate"
+                     "output" : "/actions/flying/in/RotateYawPitch"
                   }
                },
                "mode" : "joystick",
@@ -125,7 +125,7 @@
             {
                "inputs" : {
                   "click" : {
-                     "output" : "/actions/flying/in/thrustroll"
+                     "output" : "/actions/flying/in/RotateRoll"
                   }
                },
                "mode" : "button",
@@ -174,7 +174,7 @@
             {
                "inputs" : {
                   "position" : {
-                     "output" : "/actions/walking/in/walkrotate"
+                     "output" : "/actions/walking/in/TurnRightLeft"
                   }
                },
                "mode" : "joystick",

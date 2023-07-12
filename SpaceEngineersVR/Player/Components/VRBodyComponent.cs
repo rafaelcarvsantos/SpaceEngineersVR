@@ -1,114 +1,232 @@
 ﻿using Sandbox.Game.Entities.Character;
 using Sandbox.Game.Entities.Character.Components;
+using Sandbox.Game.Weapons;
+using Sandbox.Game.World;
 using SpaceEngineersVR.Plugin;
+using SpaceEngineersVR.Util;
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using VRageMath;
 using VRageRender.Animations;
 
-namespace SpaceEngineersVR.Player.Components
+namespace SpaceEngineersVR.Player.Components;
+
+[InitialiseOnStart]
+public class VRBodyComponent : MyCharacterComponent
 {
-    internal class VRBodyComponent : MyCharacterComponent
-    {
-        public BodyCalibration characterCalibration;
+	public class ScalingMode
+	{
+		public ScalingMode(string name, string tooltip, Func<BodyCalibration, BodyCalibration, Matrix> method)
+		{
+			this.name = name;
+			this.tooltip = tooltip;
+			this.method = method;
+		}
 
-        private static readonly Matrix HandExtraTransformL = Matrix.CreateRotationZ(MathHelper.Pi / 2f);
-        private static readonly Matrix HandExtraTransformR = Matrix.CreateRotationZ(MathHelper.Pi / 2f) * Matrix.CreateRotationY(MathHelper.Pi);
+		public readonly string name;
+		public readonly string tooltip;
+		public readonly Func<BodyCalibration, BodyCalibration, Matrix> method;
+	}
 
-        private static readonly FieldInfo HandIndexFieldL = HarmonyLib.AccessTools.Field(typeof(MyCharacter), "m_leftHandIKEndBone");
-        private static readonly FieldInfo HandIndexFieldR = HarmonyLib.AccessTools.Field(typeof(MyCharacter), "m_rightHandIKEndBone");
+	public static readonly ScalingMode NoScaling = new(
+		"None",
+		"Does not scale the player. Shorter players may not be able to touch the in-game floor, taller players may experience stretching in the arms.",
+		(player, character) =>
+		{
+			return Matrix.Identity;
+		});
+	public static readonly ScalingMode HeightScaling = new(
+		"Height",
+		"Scales the player such that the real world floor matches the in-game floor. Taller players may see stretching in the arms, shorter players may not be able to reach as far.",
+		(player, character) =>
+		{
+			return Matrix.CreateScale(character.height / player.height);
+		});
+	public static readonly ScalingMode ArmSpanScaling = new(
+		"Arm Span",
+		"Scales the player such that your arm span matches the character's. You will not experience arm stretching or short reach, but the floor may not match up",
+		(player, character) =>
+		{
+			return Matrix.CreateScale(character.height / player.height);
+		});
+	public static readonly List<ScalingMode> ScalingModes = new()
+	{
+		NoScaling,
+		HeightScaling,
+		ArmSpanScaling,
+	};
 
-        private static readonly FieldInfo ArmIKStartIndexFieldL = HarmonyLib.AccessTools.Field(typeof(MyCharacter), "m_leftHandIKStartBone");
-        private static readonly FieldInfo ArmIKStartIndexFieldR = HarmonyLib.AccessTools.Field(typeof(MyCharacter), "m_rightHandIKStartBone");
+	public static readonly int DefaultScalingMode = 1;
 
-        private static readonly MethodInfo CalculateHandIK = HarmonyLib.AccessTools.Method(typeof(MyCharacter), "CalculateHandIK", new Type[]
-        {
-            typeof(int), //startBoneIndex
-            typeof(int), //endBoneIndex
-            typeof(MatrixD).MakeByRefType(), //targetTransform
-        });
+	private static readonly Handed<Matrix> HandExtraTransforms = new(
+												Matrix.CreateRotationZ( MathHelper.Pi / 2) * Matrix.CreateRotationX(MathHelper.Pi / 2),
+		Matrix.CreateRotationY(MathHelper.Pi) * Matrix.CreateRotationZ(-MathHelper.Pi / 2) * Matrix.CreateRotationX(MathHelper.Pi / 2));
 
-        private int handIndexL;
-        private int handIndexR;
+	private static readonly Handed<FieldInfo> HandIndexFields = new(
+		HarmonyLib.AccessTools.Field(typeof(MyCharacter), "m_leftHandIKEndBone"),
+		HarmonyLib.AccessTools.Field(typeof(MyCharacter), "m_rightHandIKEndBone"));
 
-        private int armIKStartIndexL;
-        private int armIKStartIndexR;
+	private static readonly Handed<FieldInfo> ArmIKStartIndexFields = new(
+		HarmonyLib.AccessTools.Field(typeof(MyCharacter), "m_leftHandIKStartBone"),
+		HarmonyLib.AccessTools.Field(typeof(MyCharacter), "m_rightHandIKStartBone"));
+
+	private static readonly MethodInfo CalculateHandIK = HarmonyLib.AccessTools.Method(typeof(MyCharacter), "CalculateHandIK", new Type[]
+	{
+		typeof(int), //startBoneIndex
+			typeof(int), //endBoneIndex
+			typeof(MatrixD).MakeByRefType(), //targetTransform
+		});
+
+	static VRBodyComponent()
+	{
+		MySession.AfterLoading += GameLoaded;
+	}
+
+	private static void GameLoaded()
+	{
+		/*
+		MySession.Static.CameraAttachedToChanged += (oldCamera, newCamera) =>
+		{
+			oldCamera?.Entity?.Components.Remove<VRBodyComponent>();
+			if (newCamera.Entity != null && newCamera.Entity is MyCharacter character)
+			{
+				character.Components.Add(new VRBodyComponent());
+			}
+		};
+		*/
+	}
+
+	public MatrixAndInvert playerToCharacter;
+	public BodyCalibration characterCalibration;
+
+	private Handed<int> handIndexes;
+	private Handed<int> armIKStartIndexes;
+
+	public struct Hand
+	{
+		public Hand(MatrixD world, Matrix local)
+		{
+			this.world = world;
+			this.local = local;
+		}
+
+		public MatrixD world;
+		public Matrix local;
+	}
+	public Handed<Hand?> hands { get; private set; }
 
 
-        public override void OnAddedToScene()
-        {
-            Init();
-        }
+	public override void OnAddedToScene()
+	{
+		Init();
+	}
 
-        public override void OnAddedToContainer()
-        {
-            NeedsUpdateBeforeSimulation = true;
-            if (Character.InScene)
-            {
-                Init();
-            }
-        }
+	public override void OnAddedToContainer()
+	{
+		base.OnAddedToContainer();
 
-        private void Init()
-        {
-            Logger.Debug("Initalizing VR hands");
+		NeedsUpdateBeforeSimulation = true;
+		if (Character.InScene)
+		{
+			Init();
+		}
+	}
 
-            MyCharacterBone[] bones = Character.AnimationController.CharacterBones;
+	private void Init()
+	{
+		Logger.Debug("Initalizing VR hands");
 
-            MyCharacterBone headBone = bones[Character.HeadBoneIndex];
-            Vector3 headPos = headBone.GetAbsoluteRigTransform().Translation;
+		MyCharacterBone[] bones = Character.AnimationController.CharacterBones;
 
-            characterCalibration.height = headPos.Y;
+		MyCharacterBone headBone = bones[Character.HeadBoneIndex];
+		Vector3 headPos = headBone.GetAbsoluteRigTransform().Translation;
 
+		characterCalibration.height = headPos.Y;
 
-            handIndexL = (int)HandIndexFieldL.GetValue(Character);
-            handIndexR = (int)HandIndexFieldR.GetValue(Character);
+		handIndexes = new(
+			(int)HandIndexFields.left.GetValue(Character),
+			(int)HandIndexFields.right.GetValue(Character));
 
-            armIKStartIndexL = (int)ArmIKStartIndexFieldL.GetValue(Character);
-            armIKStartIndexR = (int)ArmIKStartIndexFieldR.GetValue(Character);
+		armIKStartIndexes = new(
+			(int)ArmIKStartIndexFields.left.GetValue(Character),
+			(int)ArmIKStartIndexFields.right.GetValue(Character));
 
-            MyCharacterBone handBoneL = handIndexL >= 0 ? bones[handIndexL] : null;
-            MyCharacterBone handBoneR = handIndexR >= 0 ? bones[handIndexR] : null;
+		Handed<MyCharacterBone> handBones = new(
+			handIndexes.left >= 0 ? bones[handIndexes.left] : null,
+			handIndexes.right >= 0 ? bones[handIndexes.right] : null);
 
-            MyCharacterBone shoulderL = armIKStartIndexL >= 0 ? bones[armIKStartIndexL] : null;
-            MyCharacterBone shoulderR = armIKStartIndexR >= 0 ? bones[armIKStartIndexR] : null;
+		Handed<MyCharacterBone> shoulders = new(
+			armIKStartIndexes.left >= 0 ? bones[armIKStartIndexes.left] : null,
+			armIKStartIndexes.right >= 0 ? bones[armIKStartIndexes.right] : null);
 
-            float lengthL = CalculateArmLength(handBoneL, shoulderL);
-            float lengthR = CalculateArmLength(handBoneR, shoulderR);
-            float shoulderWidth = Vector3.Distance(shoulderL.GetAbsoluteRigTransform().Translation, shoulderR.GetAbsoluteRigTransform().Translation);
+		Handed<float> lengths = new(
+			CalculateArmLength(handBones.left, shoulders.left),
+			CalculateArmLength(handBones.right, shoulders.right));
 
-            characterCalibration.armSpan = lengthL + lengthR + shoulderWidth;
+		float shoulderWidth = Vector3.Distance(shoulders.left.GetAbsoluteRigTransform().Translation, shoulders.right.GetAbsoluteRigTransform().Translation);
 
-            static float CalculateArmLength(MyCharacterBone hand, MyCharacterBone shoulder)
-            {
-                float totalLength = 0f;
-                for (MyCharacterBone bone = hand; bone != shoulder; bone = bone.Parent)
-                {
-                    totalLength += bone.BindTransform.Translation.Length();
-                }
-                return totalLength;
-            }
-        }
+		characterCalibration.armSpan = lengths.left + lengths.right + shoulderWidth;
 
-        public override void OnCharacterDead()
-        {
-        }
+		static float CalculateArmLength(MyCharacterBone hand, MyCharacterBone shoulder)
+		{
+			float totalLength = 0;
+			for (MyCharacterBone bone = hand; bone != shoulder; bone = bone.Parent)
+			{
+				totalLength += bone.BindTransform.Translation.Length();
+			}
+			return totalLength;
+		}
 
-        public override void UpdateBeforeSimulation()
-        {
-            Update(Player.HandL, armIKStartIndexL, handIndexL, HandExtraTransformL);
-            Update(Player.HandR, armIKStartIndexR, handIndexR, HandExtraTransformR);
+		Player.OnPlayerCalibrationChanged += RecalculatePlayerScale;
+		RecalculatePlayerScale(Player.GetBodyCalibration());
+	}
 
-            void Update(Controller controller, int ikStartIndex, int handBoneIndex, Matrix rotationMatrix)
-            {
-                if (!controller.pose.isTracked)
-                    return;
+	private void RecalculatePlayerScale(BodyCalibration playerCalibration)
+	{
+		playerToCharacter = new(ScalingModes[Common.Config.bodyScalingModeIndex].method(playerCalibration, characterCalibration));
+	}
 
-                MatrixD mat = rotationMatrix * controller.deviceToPlayer * Character.WorldMatrix;
-                CalculateHandIK.Invoke(Character, new object[] { ikStartIndex, handBoneIndex, mat });
-            }
-        }
+	public override void OnCharacterDead()
+	{
+	}
 
-        public override string ComponentTypeDebugString => "VR Hands Component";
-    }
+	public override void UpdateBeforeSimulation()
+	{
+		MatrixD charHeadMatrix = Character.GetHeadMatrix(false);
+
+		Matrix aimOffset;
+		if (Character.CurrentWeapon is not null) //TODO: Custom offsets for each weapon/tool, preferably with an easy in game way to adjust it for modded weapons/tools
+			aimOffset = Matrix.CreateRotationX(Common.Config.handAimPitch) * Matrix.CreateRotationZ(Common.Config.handAimYaw);
+		else
+			aimOffset = Matrix.CreateRotationX(Common.Config.handActivationPitch) * Matrix.CreateRotationZ(Common.Config.handActivationYaw);
+
+		hands = new(
+			UpdateHand(Player.Hands.left),
+			UpdateHand(Player.Hands.right));
+
+		if (hands.left != null)  UpdateHandBones(hands.left.Value,  armIKStartIndexes.left,  handIndexes.left,  HandExtraTransforms.left);
+		if (hands.right != null) UpdateHandBones(hands.right.Value, armIKStartIndexes.right, handIndexes.right, HandExtraTransforms.right);
+
+		Hand? UpdateHand(Controller controller)
+		{
+			if (!controller.pose.isTracked)
+				return null;
+
+			Matrix local = aimOffset * controller.deviceToAbsolute.matrix * Player.NeutralHeadToAbsolute.inverted * playerToCharacter.matrix;
+			local.Orthogonalize();
+			MatrixD world = local * charHeadMatrix;
+
+			Util.Util.DrawDebugMatrix(world, "Hand");
+
+			return new(world, local);
+		}
+
+		void UpdateHandBones(in Hand hand, int ikStartIndex, int handBoneIndex, Matrix extraMatrix)
+		{
+			CalculateHandIK.Invoke(Character, new object[] { ikStartIndex, handBoneIndex, extraMatrix * hand.world });
+		}
+	}
+
+	public override string ComponentTypeDebugString => "VR Body Component";
 }

@@ -1,68 +1,135 @@
+using SpaceEngineersVR.Player.Components;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using VRageMath;
 
-namespace SpaceEngineersVR.Config
+namespace SpaceEngineersVR.Config;
+
+public class PluginConfig : INotifyPropertyChanged
 {
-    public class PluginConfig : INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler PropertyChanged;
+	public struct SliderData
+	{
+		public SliderData(float min, float max, float initial)
+		{
+			this.min = min;
+			this.max = max;
+			this.initial = initial;
+		}
 
-        private void SetValue<T>(ref T field, T value, [CallerMemberName] string propName = "")
-        {
-            if (EqualityComparer<T>.Default.Equals(field, value))
-                return;
+		public float min;
+		public float max;
+		public float initial;
+	}
 
-            field = value;
+	public event PropertyChangedEventHandler PropertyChanged;
 
-            OnPropertyChanged(propName);
-        }
+	private void SetValue<T>(ref T field, T value, [CallerMemberName] string propName = "")
+	{
+		if (EqualityComparer<T>.Default.Equals(field, value))
+			return;
 
-        private void OnPropertyChanged([CallerMemberName] string propName = "")
-        {
-            PropertyChangedEventHandler propertyChanged = PropertyChanged;
-            if (propertyChanged == null)
-                return;
+		field = value;
 
-            propertyChanged(this, new PropertyChangedEventArgs(propName));
-        }
+		OnPropertyChanged(propName);
+	}
 
-        private bool enableKeyboardAndMouseControls = true;
-        private bool enableCharacterRendering = true;
+	private void OnPropertyChanged([CallerMemberName] string propName = "")
+	{
+		PropertyChangedEventHandler propertyChanged = PropertyChanged;
+		if (propertyChanged == null)
+			return;
 
-        private bool useHeadRotationForCharacter = true;
+		propertyChanged(this, new PropertyChangedEventArgs(propName));
+	}
+
+	private bool enableKeyboardAndMouseControlsValue = true;
+	private bool enableCharacterRenderingValue = true;
+
+	private bool useHeadRotationForCharacterValue = true;
+
+	private int bodyScalingModeIndexValue = VRBodyComponent.DefaultScalingMode;
 
 
-        private float playerHeight = 1.69f;
-        private float playerArmSpan = 1.66f;
+	private float playerHeightValue = 1.69f;
+	private float playerArmSpanValue = 1.66f;
 
-        public bool EnableKeyboardAndMouseControls
-        {
-            get => enableKeyboardAndMouseControls;
-            set => SetValue(ref enableKeyboardAndMouseControls, value);
-        }
 
-        public bool EnableCharacterRendering
-        {
-            get => enableCharacterRendering;
-            set => SetValue(ref enableCharacterRendering, value);
-        }
+	public static readonly SliderData ResolutionScaleData = new(0.1f, 2.0f, 1.0f);
+	private float resolutionScaleValue = ResolutionScaleData.initial;
 
-        public bool UseHeadRotationForCharacter
-        {
-            get => useHeadRotationForCharacter;
-            set => SetValue(ref useHeadRotationForCharacter, value);
-        }
 
-        public float PlayerHeight
-        {
-            get => playerHeight;
-            set => SetValue(ref playerHeight, value);
-        }
-        public float PlayerArmSpan
-        {
-            get => playerArmSpan;
-            set => SetValue(ref playerArmSpan, value);
-        }
-    }
+	public static readonly SliderData HandActivationPitchData = new(-180f, 180f, -90f);
+	private float handActivationPitchValue = MathHelper.ToRadians(HandActivationPitchData.initial);
+	public static readonly SliderData HandActivationYawData = new(-180f, 180f, 0f);
+	private float handActivationYawValue = MathHelper.ToRadians(HandActivationYawData.initial);
+
+	public static readonly SliderData HandAimPitchData = new(-180f, 180f, 0f);
+	private float handAimPitchValue = MathHelper.ToRadians(HandAimPitchData.initial);
+	public static readonly SliderData HandAimYawData = new(-180f, 180f, 0f);
+	private float handAimYawValue = MathHelper.ToRadians(HandAimYawData.initial);
+
+
+	public bool enableKeyboardAndMouseControls
+	{
+		get => enableKeyboardAndMouseControlsValue;
+		set => SetValue(ref enableKeyboardAndMouseControlsValue, value);
+	}
+
+	public bool enableCharacterRendering
+	{
+		get => enableCharacterRenderingValue;
+		set => SetValue(ref enableCharacterRenderingValue, value);
+	}
+
+	public bool useHeadRotationForCharacter
+	{
+		get => useHeadRotationForCharacterValue;
+		set => SetValue(ref useHeadRotationForCharacterValue, value);
+	}
+
+	public float playerHeight
+	{
+		get => playerHeightValue;
+		set => SetValue(ref playerHeightValue, value);
+	}
+	public float playerArmSpan
+	{
+		get => playerArmSpanValue;
+		set => SetValue(ref playerArmSpanValue, value);
+	}
+
+	public int bodyScalingModeIndex
+	{
+		get => bodyScalingModeIndexValue;
+		set => SetValue(ref bodyScalingModeIndexValue, value);
+	}
+
+	public float resolutionScale
+	{
+		get => resolutionScaleValue;
+		set => SetValue(ref resolutionScaleValue, value);
+	}
+
+	public float handActivationPitch
+	{
+		get => handActivationPitchValue;
+		set => SetValue(ref handActivationPitchValue, value);
+	}
+	public float handActivationYaw
+	{
+		get => handActivationYawValue;
+		set => SetValue(ref handActivationYawValue, value);
+	}
+
+	public float handAimPitch
+	{
+		get => handAimPitchValue;
+		set => SetValue(ref handAimPitchValue, value);
+	}
+	public float handAimYaw
+	{
+		get => handAimYawValue;
+		set => SetValue(ref handAimYawValue, value);
+	}
 }

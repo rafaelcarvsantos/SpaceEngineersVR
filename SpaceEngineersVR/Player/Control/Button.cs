@@ -1,30 +1,37 @@
 ﻿using System.Runtime.CompilerServices;
 using Valve.VR;
 
-namespace SpaceEngineersVR.Player.Control
+namespace SpaceEngineersVR.Player.Control;
+
+public interface IButton : IControl
 {
-    public class Button
-    {
-        private static readonly unsafe uint InputDigitalActionData_t_size = (uint)sizeof(InputDigitalActionData_t);
+	bool isPressed { get; }
+	bool hasChanged { get; }
+	bool hasPressed { get; }
+	bool hasReleased { get; }
+}
 
-        private InputDigitalActionData_t data;
-        private readonly ulong handle;
+public sealed class OpenVRButton : IButton
+{
+	private static readonly unsafe uint InputDigitalActionData_t_size = (uint)sizeof(InputDigitalActionData_t);
 
-        public bool Active => data.bActive;
-        public bool IsPressed => data.bState;
-        public bool HasChanged => data.bChanged;
-        public bool HasPressed => data.bState && data.bChanged;
-        public bool HasReleased => !data.bState && data.bChanged;
+	private InputDigitalActionData_t data;
+	private readonly ulong handle;
 
-        public Button(string name)
-        {
-            OpenVR.Input.GetActionHandle(name, ref handle);
-        }
+	public bool active => data.bActive;
+	public bool isPressed => data.bState;
+	public bool hasChanged => data.bChanged;
+	public bool hasPressed => data.bState && data.bChanged;
+	public bool hasReleased => !data.bState && data.bChanged;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void Update()
-        {
-            OpenVR.Input.GetDigitalActionData(handle, ref data, InputDigitalActionData_t_size, OpenVR.k_ulInvalidInputValueHandle);
-        }
-    }
+	public OpenVRButton(string actionName)
+	{
+		OpenVR.Input.GetActionHandle(actionName, ref handle);
+	}
+
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public void Update()
+	{
+		OpenVR.Input.GetDigitalActionData(handle, ref data, InputDigitalActionData_t_size, OpenVR.k_ulInvalidInputValueHandle);
+	}
 }

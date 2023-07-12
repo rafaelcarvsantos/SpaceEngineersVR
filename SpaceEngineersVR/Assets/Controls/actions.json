@@ -41,18 +41,13 @@
   ],
   "actions": [
     {
-      "name": "/actions/walking/in/WalkLatitudinal",
+      "name": "/actions/walking/in/Move",
       "requirement": "mandatory",
       "type": "vector2"
     },
     {
-      "name": "/actions/walking/in/WalkLongitudinal",
-      "requirement": "mandatory",
-      "type": "vector2"
-    },
-    {
-      "name": "/actions/walking/in/WalkRotate",
-      "requirement": "mandatory",
+      "name": "/actions/walking/in/TurnRightLeft",
+      "requirement": "optional",
       "type": "vector2"
     },
     {
@@ -96,13 +91,33 @@
       "type": "vector1"
     },
     {
-      "name": "/actions/flying/in/ThrustRotate",
+      "name": "/actions/flying/in/RotateYawPitch",
       "requirement": "mandatory",
       "type": "vector2"
     },
     {
-      "name": "/actions/flying/in/ThrustRoll",
+      "name": "/actions/flying/in/RotateRoll",
       "requirement": "suggested",
+      "type": "vector1"
+    },
+    {
+      "name": "/actions/flying/in/GrabLeftThrustVirtualJoystick",
+      "requirement": "optional",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/flying/in/GrabRightThrustVirtualJoystick",
+      "requirement": "optional",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/flying/in/GrabLeftRotateVirtualJoystick",
+      "requirement": "optional",
+      "type": "boolean"
+    },
+    {
+      "name": "/actions/flying/in/GrabRightRotateVirtualJoystick",
+      "requirement": "optional",
       "type": "boolean"
     },
     {
@@ -336,9 +351,8 @@
       "language_tag": "en_us",
       "/actions/walking": "Walking",
       "/actions/walking/in/Walk": "Walk",
-      "/actions/walking/in/WalkForward": "Forward",
-      "/actions/walking/in/WalkBackward": "Backward",
-      "/actions/walking/in/WalkRotate": "Rotate",
+      "/actions/walking/in/Move": "Move",
+      "/actions/walking/in/TurnRightLeft": "Turn right/left (X axis)",
       "/actions/walking/in/JumpOrClimbUp": "Jump or climb up",
       "/actions/walking/in/CrouchOrClimbDown": "Crouch or climb down",
       "/actions/flying": "Flying",
@@ -348,8 +362,12 @@
       "/actions/flying/in/ThrustDown": "Down",
       "/actions/flying/in/ThrustForward": "Forward",
       "/actions/flying/in/ThrustBackward": "Backward",
-      "/actions/flying/in/ThrustRotate": "Rotate",
-      "/actions/flying/in/ThrustRoll": "Roll",
+      "/actions/flying/in/RotateYawPitch": "Yaw and pitch",
+      "/actions/flying/in/RotateRoll": "Roll",
+      "/actions/flying/in/GrabLeftThrustVirtualJoystick": "Grab thruster virtual joystick (left)",
+      "/actions/flying/in/GrabRightThrustVirtualJoystick": "Grab thruster virtual joystick (right)",
+      "/actions/flying/in/GrabLeftRotateVirtualJoystick": "Grab rotation virtual joystick (left)",
+      "/actions/flying/in/GrabRightRotateVirtualJoystick": "Grab rotation virtual joystick (right)",
       "/actions/flying/in/Dampener": "Dampener",
       "/actions/common": "Common",
       "/actions/common/in/Primary": "Use primary",

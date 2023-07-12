@@ -2,6 +2,6 @@
 
 public struct BodyCalibration
 {
-    public float height;
-    public float armSpan;
+	public float height;
+	public float armSpan;
 }
