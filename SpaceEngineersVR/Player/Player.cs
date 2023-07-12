@@ -9,298 +9,299 @@ using VRage.Collections;
 using VRage.Input;
 using VRageMath;
 
-namespace SpaceEngineersVR.Player;
-
-public static class Player
+namespace SpaceEngineersVR.Player
 {
-	private const int CalibrationTimeTicks = 60 * 5;
-
-	public static readonly Headset Headset = new();
-
-	public static LeftRight Handedness = LeftRight.Right;
-
-	public static Handed<Controller> Hands = new(
-		new("/actions/common/in/LeftHand", "/actions/feedback/out/LeftHaptic"),
-		new("/actions/common/in/RightHand", "/actions/feedback/out/RightHaptic"));
-
-	public static readonly MyConcurrentList<TrackedDevice> AllDevices = new(3);
-
-	public static BodyCalibration GetBodyCalibration()
+	public static class Player
 	{
-		using (PlayerCalibrationLock.AcquireSharedUsing())
+		private const int CalibrationTimeTicks = 60 * 5;
+
+		public static readonly Headset Headset = new Headset();
+
+		public static LeftRight Handedness = LeftRight.Right;
+
+		public static Handed<Controller> Hands = new Handed<Controller>(
+			new Controller("/actions/common/in/LeftHand", "/actions/feedback/out/LeftHaptic"),
+			new Controller("/actions/common/in/RightHand", "/actions/feedback/out/RightHaptic"));
+
+		public static readonly MyConcurrentList<TrackedDevice> AllDevices = new MyConcurrentList<TrackedDevice>(3);
+
+		public static BodyCalibration GetBodyCalibration()
 		{
-			return PlayerCalibration;
-		}
-	}
-
-	public static bool IsCalibrating => CalibratingTicksLeft > 0;
-
-	private static readonly FastResourceLock PlayerCalibrationLock = new();
-	private static BodyCalibration PlayerCalibration;
-	public static event Action<BodyCalibration> OnPlayerCalibrationChanged;
-
-	private static int CalibratingTicksLeft = 0;
-	private static BodyCalibration CalibrationInProgress;
-
-
-	public static MatrixAndInvert PlayerToAbsolute { get; private set; } = MatrixAndInvert.Identity;
-	public static MatrixAndInvert NeutralHeadToAbsolute { get; private set; } = MatrixAndInvert.Identity;
-
-	//PlayerToAbsolute that is synced for render thread
-	public static MatrixAndInvert RenderPlayerToAbsolute = MatrixAndInvert.Identity;
-
-	private static readonly FastResourceLock SyncPlayerToAbsoluteLock = new();
-	private static MatrixAndInvert SyncPlayerToAbsolute = MatrixAndInvert.Identity;
-
-
-	private static uint NextDeviceId = 0;
-
-	private static readonly TrackedDevicePose_t[] RenderPoses = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
-	private static readonly TrackedDevicePose_t[] RenderPosesFuture = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount]; //Poses one frame in the future
-
-	private static readonly object SyncPosesLock = new();
-	private static TrackedDevicePose_t[] SyncPoses = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
-
-	private static TrackedDevicePose_t[] Poses = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
-
-	static Player()
-	{
-		AllDevices.Add(Headset);
-		AllDevices.Add(Hands.left);
-		AllDevices.Add(Hands.right);
-
-		using (PlayerCalibrationLock.AcquireExclusiveUsing())
-		{
-			PlayerCalibration.height = Common.Config.playerHeight;
-			PlayerCalibration.armSpan = Common.Config.playerArmSpan;
-		}
-	}
-
-	public static void RenderUpdate()
-	{
-		//Check for new devices
-		for (; NextDeviceId < OpenVR.k_unMaxTrackedDeviceCount; NextDeviceId++)
-		{
-			//In OpenVR, once a device is connected once, its ID is unique, even if disconnected
-			ETrackedDeviceClass deviceClass = OpenVR.System.GetTrackedDeviceClass(NextDeviceId);
-
-			if (deviceClass == ETrackedDeviceClass.Invalid)
+			using (PlayerCalibrationLock.AcquireSharedUsing())
 			{
-				break;
-			}
-
-			if (deviceClass == ETrackedDeviceClass.GenericTracker)
-			{
-				TrackedDevice device = new TrackedDevice
-				{
-					deviceId = NextDeviceId
-				};
-				AllDevices.Add(device);
+				return PlayerCalibration;
 			}
 		}
 
-		OpenVR.Compositor.WaitGetPoses(RenderPoses, RenderPosesFuture);
+		public static bool IsCalibrating => CalibratingTicksLeft > 0;
 
-		Compositor_FrameTiming timings = default;
-		OpenVR.Compositor.GetFrameTiming(ref timings, 0);
-		if (timings.m_nNumDroppedFrames != 0)
+		private static readonly FastResourceLock PlayerCalibrationLock = new FastResourceLock();
+		private static BodyCalibration PlayerCalibration;
+		public static event Action<BodyCalibration> OnPlayerCalibrationChanged;
+
+		private static int CalibratingTicksLeft = 0;
+		private static BodyCalibration CalibrationInProgress;
+
+
+		public static MatrixAndInvert PlayerToAbsolute { get; private set; } = MatrixAndInvert.Identity;
+		public static MatrixAndInvert NeutralHeadToAbsolute { get; private set; } = MatrixAndInvert.Identity;
+
+		//PlayerToAbsolute that is synced for render thread
+		public static MatrixAndInvert RenderPlayerToAbsolute = MatrixAndInvert.Identity;
+
+		private static readonly FastResourceLock SyncPlayerToAbsoluteLock = new FastResourceLock();
+		private static MatrixAndInvert SyncPlayerToAbsolute = MatrixAndInvert.Identity;
+
+
+		private static uint NextDeviceId = 0;
+
+		private static readonly TrackedDevicePose_t[] RenderPoses = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
+		private static readonly TrackedDevicePose_t[] RenderPosesFuture = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount]; //Poses one frame in the future
+
+		private static readonly object SyncPosesLock = new object();
+		private static TrackedDevicePose_t[] SyncPoses = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
+
+		private static TrackedDevicePose_t[] Poses = new TrackedDevicePose_t[OpenVR.k_unMaxTrackedDeviceCount];
+
+		static Player()
 		{
-			Logger.Warning("Dropping frames!");
-			Logger.IncreaseIndent();
-			StringBuilder builder = new StringBuilder();
-			builder.AppendLine("FrameInterval: " + timings.m_flClientFrameIntervalMs);
-			builder.AppendLine("IdleTime     : " + timings.m_flCompositorIdleCpuMs);
-			builder.AppendLine("RenderCPU    : " + timings.m_flCompositorRenderCpuMs);
-			builder.AppendLine("RenderGPU    : " + timings.m_flCompositorRenderGpuMs);
-			builder.AppendLine("SubmitTime   : " + timings.m_flSubmitFrameMs);
-			builder.AppendLine("DroppedFrames: " + timings.m_nNumDroppedFrames);
-			Logger.Warning(builder.ToString());
-			Logger.Warning("");
+			AllDevices.Add(Headset);
+			AllDevices.Add(Hands.left);
+			AllDevices.Add(Hands.right);
+
+			using (PlayerCalibrationLock.AcquireExclusiveUsing())
+			{
+				PlayerCalibration.height = Common.Config.playerHeight;
+				PlayerCalibration.armSpan = Common.Config.playerArmSpan;
+			}
 		}
 
+		public static void RenderUpdate()
 		{
-			bool lockTaken = false;
-			try
+			//Check for new devices
+			for (; NextDeviceId < OpenVR.k_unMaxTrackedDeviceCount; NextDeviceId++)
 			{
-				Monitor.TryEnter(SyncPosesLock, ref lockTaken);
-				if (lockTaken)
+				//In OpenVR, once a device is connected once, its ID is unique, even if disconnected
+				ETrackedDeviceClass deviceClass = OpenVR.System.GetTrackedDeviceClass(NextDeviceId);
+
+				if (deviceClass == ETrackedDeviceClass.Invalid)
 				{
-					for (int i = 0; i < OpenVR.k_unMaxTrackedDeviceCount; ++i)
+					break;
+				}
+
+				if (deviceClass == ETrackedDeviceClass.GenericTracker)
+				{
+					TrackedDevice device = new TrackedDevice
 					{
-						SyncPoses[i] = RenderPoses[i];
+						deviceId = NextDeviceId
+					};
+					AllDevices.Add(device);
+				}
+			}
+
+			OpenVR.Compositor.WaitGetPoses(RenderPoses, RenderPosesFuture);
+
+			Compositor_FrameTiming timings = default;
+			OpenVR.Compositor.GetFrameTiming(ref timings, 0);
+			if (timings.m_nNumDroppedFrames != 0)
+			{
+				Logger.Warning("Dropping frames!");
+				Logger.IncreaseIndent();
+				StringBuilder builder = new StringBuilder();
+				builder.AppendLine("FrameInterval: " + timings.m_flClientFrameIntervalMs);
+				builder.AppendLine("IdleTime     : " + timings.m_flCompositorIdleCpuMs);
+				builder.AppendLine("RenderCPU    : " + timings.m_flCompositorRenderCpuMs);
+				builder.AppendLine("RenderGPU    : " + timings.m_flCompositorRenderGpuMs);
+				builder.AppendLine("SubmitTime   : " + timings.m_flSubmitFrameMs);
+				builder.AppendLine("DroppedFrames: " + timings.m_nNumDroppedFrames);
+				Logger.Warning(builder.ToString());
+				Logger.Warning("");
+			}
+
+			{
+				bool lockTaken = false;
+				try
+				{
+					Monitor.TryEnter(SyncPosesLock, ref lockTaken);
+					if (lockTaken)
+					{
+						for (int i = 0; i < OpenVR.k_unMaxTrackedDeviceCount; ++i)
+						{
+							SyncPoses[i] = RenderPoses[i];
+						}
+					}
+				}
+				finally
+				{
+					if (lockTaken)
+					{
+						Monitor.Exit(SyncPosesLock);
 					}
 				}
 			}
-			finally
+
+			//Vive controllers work out whether they are left or right handed by their relative position to the headset. they can even change at runtime
 			{
-				if (lockTaken)
+				uint rightHandIndex = OpenVR.System.GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole.RightHand);
+				if (rightHandIndex != OpenVR.k_unTrackedDeviceIndexInvalid)
 				{
-					Monitor.Exit(SyncPosesLock);
+					Hands.right.deviceId = rightHandIndex;
 				}
 			}
+			{
+				uint leftHandIndex = OpenVR.System.GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole.LeftHand);
+				if (leftHandIndex != OpenVR.k_unTrackedDeviceIndexInvalid)
+				{
+					Hands.left.deviceId = leftHandIndex;
+				}
+			}
+
+			{
+				bool lockTaken = false;
+				try
+				{
+					//Could cause weird sync issues where some objects render in the wrong place for a frame or two, but better than reducing frame rate
+					//maybe we should have a list of objects that we override the rendering for to be relative to a certain device at render-time?
+					lockTaken = SyncPlayerToAbsoluteLock.TryAcquireShared();
+					if (lockTaken)
+						RenderPlayerToAbsolute = SyncPlayerToAbsolute;
+				}
+				finally
+				{
+					if (lockTaken)
+						SyncPlayerToAbsoluteLock.ReleaseShared();
+				}
+			}
+
+			foreach (TrackedDevice device in AllDevices)
+			{
+				if (device.deviceId != OpenVR.k_unTrackedDeviceIndexInvalid)
+				{
+					device.SetRenderPoseData(RenderPoses[device.deviceId]);
+				}
+			}
+
+
+			Headset.RenderUpdate();
 		}
 
-		//Vive controllers work out whether they are left or right handed by their relative position to the headset. they can even change at runtime
+		public static void MainUpdate()
 		{
-			uint rightHandIndex = OpenVR.System.GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole.RightHand);
-			if (rightHandIndex != OpenVR.k_unTrackedDeviceIndexInvalid)
-			{
-				Hands.right.deviceId = rightHandIndex;
-			}
-		}
-		{
-			uint leftHandIndex = OpenVR.System.GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole.LeftHand);
-			if (leftHandIndex != OpenVR.k_unTrackedDeviceIndexInvalid)
-			{
-				Hands.left.deviceId = leftHandIndex;
-			}
-		}
-
-		{
-			bool lockTaken = false;
 			try
 			{
-				//Could cause weird sync issues where some objects render in the wrong place for a frame or two, but better than reducing frame rate
-				//maybe we should have a list of objects that we override the rendering for to be relative to a certain device at render-time?
-				lockTaken = SyncPlayerToAbsoluteLock.TryAcquireShared();
-				if (lockTaken)
-					RenderPlayerToAbsolute = SyncPlayerToAbsolute;
+				Monitor.Enter(SyncPosesLock);
+				TrackedDevicePose_t[] tmp = Poses;
+				Poses = SyncPoses;
+				SyncPoses = tmp;
 			}
 			finally
 			{
-				if (lockTaken)
-					SyncPlayerToAbsoluteLock.ReleaseShared();
+				Monitor.Exit(SyncPosesLock);
 			}
-		}
 
-		foreach (TrackedDevice device in AllDevices)
-		{
-			if (device.deviceId is not OpenVR.k_unTrackedDeviceIndexInvalid)
+			foreach (TrackedDevice device in AllDevices)
 			{
-				device.SetRenderPoseData(RenderPoses[device.deviceId]);
+				if (device.deviceId != OpenVR.k_unTrackedDeviceIndexInvalid)
+				{
+					device.SetMainPoseData(Poses[device.deviceId]);
+				}
 			}
-		}
 
+			if (MyInput.Static.IsKeyPress(MyKeys.NumPad0))
+				StartCalibration();
 
-		Headset.RenderUpdate();
-	}
-
-	public static void MainUpdate()
-	{
-		try
-		{
-			Monitor.Enter(SyncPosesLock);
-			TrackedDevicePose_t[] tmp = Poses;
-			Poses = SyncPoses;
-			SyncPoses = tmp;
-		}
-		finally
-		{
-			Monitor.Exit(SyncPosesLock);
-		}
-
-		foreach (TrackedDevice device in AllDevices)
-		{
-			if (device.deviceId is not OpenVR.k_unTrackedDeviceIndexInvalid)
+			if (CalibratingTicksLeft > 0)
 			{
-				device.SetMainPoseData(Poses[device.deviceId]);
+				CalibrationUpdate();
+
+				CalibratingTicksLeft--;
+
+				if (CalibratingTicksLeft <= 0)
+				{
+					FinishCalibration();
+				}
 			}
-		}
 
-		if (MyInput.Static.IsKeyPress(MyKeys.NumPad0))
-			StartCalibration();
-
-		if (CalibratingTicksLeft > 0)
-		{
-			CalibrationUpdate();
-
-			CalibratingTicksLeft--;
-
-			if (CalibratingTicksLeft <= 0)
+			foreach (TrackedDevice device in AllDevices)
 			{
-				FinishCalibration();
+				device.MainUpdate();
 			}
 		}
 
-		foreach (TrackedDevice device in AllDevices)
+		public static void StartCalibration(int timeTicks = CalibrationTimeTicks)
 		{
-			device.MainUpdate();
-		}
-	}
+			CalibratingTicksLeft = timeTicks;
 
-	public static void StartCalibration(int timeTicks = CalibrationTimeTicks)
-	{
-		CalibratingTicksLeft = timeTicks;
-
-		CalibrationInProgress.height = 0f;
-		CalibrationInProgress.armSpan = 0f;
-	}
-
-	private static void CalibrationUpdate()
-	{
-		if (Headset.pose.isTracked)
-		{
-			Vector3 headPos = Headset.pose.deviceToAbsolute.matrix.Translation;
-			float height = headPos.Y;
-
-			if (CalibrationInProgress.height < height)
-				CalibrationInProgress.height = height;
+			CalibrationInProgress.height = 0f;
+			CalibrationInProgress.armSpan = 0f;
 		}
 
-		if (Hands.left.pose.isTracked && Hands.right.pose.isTracked)
+		private static void CalibrationUpdate()
 		{
-			Vector3 lPos = Hands.left.pose.deviceToAbsolute.matrix.Translation;
-			Vector3 rPos = Hands.right.pose.deviceToAbsolute.matrix.Translation;
-			float armSpan = Vector2.Distance(new(lPos.X, lPos.Z), new(rPos.X, rPos.Z));
+			if (Headset.pose.isTracked)
+			{
+				Vector3 headPos = Headset.pose.deviceToAbsolute.matrix.Translation;
+				float height = headPos.Y;
 
-			if (CalibrationInProgress.armSpan < armSpan)
-				CalibrationInProgress.armSpan = armSpan;
+				if (CalibrationInProgress.height < height)
+					CalibrationInProgress.height = height;
+			}
+
+			if (Hands.left.pose.isTracked && Hands.right.pose.isTracked)
+			{
+				Vector3 lPos = Hands.left.pose.deviceToAbsolute.matrix.Translation;
+				Vector3 rPos = Hands.right.pose.deviceToAbsolute.matrix.Translation;
+				float armSpan = Vector2.Distance(new Vector2(lPos.X, lPos.Z), new Vector2(rPos.X, rPos.Z));
+
+				if (CalibrationInProgress.armSpan < armSpan)
+					CalibrationInProgress.armSpan = armSpan;
+			}
 		}
-	}
 
-	public static void FinishCalibration()
-	{
-		if (CalibrationInProgress.height > 0f)
-			Common.Config.playerHeight = CalibrationInProgress.height;
-		if (CalibrationInProgress.armSpan > 0f)
-			Common.Config.playerArmSpan = CalibrationInProgress.armSpan;
-
-		using (PlayerCalibrationLock.AcquireExclusiveUsing())
+		public static void FinishCalibration()
 		{
 			if (CalibrationInProgress.height > 0f)
-				PlayerCalibration.height = CalibrationInProgress.height;
+				Common.Config.playerHeight = CalibrationInProgress.height;
 			if (CalibrationInProgress.armSpan > 0f)
-				PlayerCalibration.armSpan = CalibrationInProgress.armSpan;
+				Common.Config.playerArmSpan = CalibrationInProgress.armSpan;
 
-			OnPlayerCalibrationChanged.InvokeIfNotNull(PlayerCalibration);
+			using (PlayerCalibrationLock.AcquireExclusiveUsing())
+			{
+				if (CalibrationInProgress.height > 0f)
+					PlayerCalibration.height = CalibrationInProgress.height;
+				if (CalibrationInProgress.armSpan > 0f)
+					PlayerCalibration.armSpan = CalibrationInProgress.armSpan;
+
+				OnPlayerCalibrationChanged.InvokeIfNotNull(PlayerCalibration);
+			}
+
+			ResetPlayerFloor();
+
+			CalibratingTicksLeft = 0;
+		}
+		public static void CancelCalibration()
+		{
+			CalibratingTicksLeft = 0;
 		}
 
-		ResetPlayerFloor();
-
-		CalibratingTicksLeft = 0;
-	}
-	public static void CancelCalibration()
-	{
-		CalibratingTicksLeft = 0;
-	}
-
-	public static void ResetPlayerFloor()
-	{
-		Matrix floor;
-		if (Common.Config.useHeadRotationForCharacter)
-			floor = Util.Util.ZeroPitchAndRoll(Headset.pose.deviceToAbsolute.matrix);
-		else
-			floor = Matrix.CreateTranslation(Headset.pose.deviceToAbsolute.matrix.Translation);
-
-		NeutralHeadToAbsolute = new(floor);
-
-		floor.M42 = 0f; //Translation.Y = 0f
-
-		PlayerToAbsolute = new(floor);
-
-		using (SyncPlayerToAbsoluteLock.AcquireExclusiveUsing())
+		public static void ResetPlayerFloor()
 		{
-			SyncPlayerToAbsolute = PlayerToAbsolute;
+			Matrix floor;
+			if (Common.Config.useHeadRotationForCharacter)
+				floor = Util.Util.ZeroPitchAndRoll(Headset.pose.deviceToAbsolute.matrix);
+			else
+				floor = Matrix.CreateTranslation(Headset.pose.deviceToAbsolute.matrix.Translation);
+
+			NeutralHeadToAbsolute = new MatrixAndInvert(floor);
+
+			floor.M42 = 0f; //Translation.Y = 0f
+
+			PlayerToAbsolute = new MatrixAndInvert(floor);
+
+			using (SyncPlayerToAbsoluteLock.AcquireExclusiveUsing())
+			{
+				SyncPlayerToAbsolute = PlayerToAbsolute;
+			}
 		}
 	}
 }

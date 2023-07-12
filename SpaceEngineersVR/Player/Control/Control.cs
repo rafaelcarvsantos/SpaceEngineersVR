@@ -1,7 +1,9 @@
-﻿namespace SpaceEngineersVR.Player.Control;
-
-public interface IControl
+﻿
+namespace SpaceEngineersVR.Player.Control
 {
-	bool active { get; }
-	void Update();
+	public interface IControl
+	{
+		bool active { get; }
+		void Update();
+	}
 }

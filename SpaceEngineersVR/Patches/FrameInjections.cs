@@ -3,34 +3,35 @@ using SpaceEngineersVR.Player.Components;
 using SpaceEngineersVR.Plugin;
 using System;
 
-namespace SpaceEngineersVR.Patches;
-
-[Util.InitialiseOnStart]
-public static class FrameInjections
+namespace SpaceEngineersVR.Patches
 {
-	public static bool DisablePresent = false;
-
-	static FrameInjections()
+	[Util.InitialiseOnStart]
+	public static class FrameInjections
 	{
-		Type t = AccessTools.TypeByName("VRageRender.MyRender11");
+		public static bool DisablePresent = false;
 
-		Common.Harmony.Patch(AccessTools.Method(t, "Present"), new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_Present)));
+		static FrameInjections()
+		{
+			Type t = AccessTools.TypeByName("VRageRender.MyRender11");
 
-		Common.Harmony.Patch(AccessTools.Method(t, "DrawScene"), new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_DrawScene)));
+			Common.Harmony.Patch(AccessTools.Method(t, "Present"), new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_Present)));
 
-		Logger.Info("Applied harmony game injections for renderer.");
-	}
+			Common.Harmony.Patch(AccessTools.Method(t, "DrawScene"), new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_DrawScene)));
 
-	private static bool Prefix_DrawScene()
-	{
-		Player.Player.RenderUpdate();
-		VRGUIManager.Draw();
+			Logger.Info("Applied harmony game injections for renderer.");
+		}
 
-		return true;
-	}
+		private static bool Prefix_DrawScene()
+		{
+			Player.Player.RenderUpdate();
+			VRGUIManager.Draw();
 
-	private static bool Prefix_Present()
-	{
-		return !DisablePresent;
+			return true;
+		}
+
+		private static bool Prefix_Present()
+		{
+			return !DisablePresent;
+		}
 	}
 }

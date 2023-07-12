@@ -1,24 +1,25 @@
 ﻿using System;
 using System.Reflection;
 
-namespace SpaceEngineersVR.Util;
-
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface)]
-internal sealed class InitialiseOnStartAttribute : Attribute
+namespace SpaceEngineersVR.Util
 {
-	public static bool IsInitialised = false;
-
-	public static void FindAndInitialise()
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Interface)]
+	internal sealed class InitialiseOnStartAttribute : Attribute
 	{
-		if (IsInitialised)
-			throw new Exception("Tried to initialise on start attributes twice");
+		public static bool IsInitialised = false;
 
-		foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+		public static void FindAndInitialise()
 		{
-			if (type.GetCustomAttributes(typeof(InitialiseOnStartAttribute), true).Length != 0)
-				System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
-		}
+			if (IsInitialised)
+				throw new Exception("Tried to initialise on start attributes twice");
 
-		IsInitialised = true;
+			foreach (Type type in Assembly.GetExecutingAssembly().GetTypes())
+			{
+				if (type.GetCustomAttributes(typeof(InitialiseOnStartAttribute), true).Length != 0)
+					System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+			}
+
+			IsInitialised = true;
+		}
 	}
 }

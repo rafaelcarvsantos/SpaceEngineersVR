@@ -2,32 +2,33 @@
 using Valve.VR;
 using VRageMath;
 
-namespace SpaceEngineersVR.Player.Control;
-
-public interface IAnalog : IControl
+namespace SpaceEngineersVR.Player.Control
 {
-	Vector3 position { get; }
-	Vector3 delta { get; }
-}
-public sealed class OpenVRAnalog : IAnalog
-{
-	private static readonly unsafe uint InputAnalogActionData_t_size = (uint)sizeof(InputAnalogActionData_t);
-
-	private InputAnalogActionData_t data;
-	private readonly ulong handle;
-
-	public bool active => data.bActive;
-	public Vector3 position => new(data.x, data.y, data.z);
-	public Vector3 delta => new(data.deltaX, data.deltaY, data.deltaZ);
-
-	public OpenVRAnalog(string actionName)
+	public interface IAnalog : IControl
 	{
-		OpenVR.Input.GetActionHandle(actionName, ref handle);
+		Vector3 position { get; }
+		Vector3 delta { get; }
 	}
-
-	[MethodImpl(MethodImplOptions.AggressiveInlining)]
-	public void Update()
+	public sealed class OpenVRAnalog : IAnalog
 	{
-		OpenVR.Input.GetAnalogActionData(handle, ref data, InputAnalogActionData_t_size, OpenVR.k_ulInvalidInputValueHandle);
+		private static readonly unsafe uint InputAnalogActionData_t_size = (uint)sizeof(InputAnalogActionData_t);
+
+		private InputAnalogActionData_t data;
+		private readonly ulong handle;
+
+		public bool active => data.bActive;
+		public Vector3 position => new Vector3(data.x, data.y, data.z);
+		public Vector3 delta => new Vector3(data.deltaX, data.deltaY, data.deltaZ);
+
+		public OpenVRAnalog(string actionName)
+		{
+			OpenVR.Input.GetActionHandle(actionName, ref handle);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public void Update()
+		{
+			OpenVR.Input.GetAnalogActionData(handle, ref data, InputAnalogActionData_t_size, OpenVR.k_ulInvalidInputValueHandle);
+		}
 	}
 }

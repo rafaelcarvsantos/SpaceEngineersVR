@@ -6,112 +6,113 @@ using System.Threading;
 using System.Xml.Serialization;
 using VRage.Utils;
 
-namespace SpaceEngineersVR.Config;
-
-// Ported from Torch's Persistent<T> class for compatibility of configuration files between targets and to work with IPluginLogger.
-// Simple class that manages saving <see cref="P:Torch.Persistent`1.Data" /> to disk using XML serialization.
-// Can automatically save on changes by implementing <see cref="T:System.ComponentModel.INotifyPropertyChanged" /> in the data class.
-/// <typeparam name="T">Data class type</typeparam>
-public class PersistentConfig<T> : IDisposable where T : class, INotifyPropertyChanged, new()
+namespace SpaceEngineersVR.Config
 {
-	private T data;
-	private Timer saveConfigTimer;
-	private const int SaveDelay = 500;
-
-	private string Path
+	// Ported from Torch's Persistent<T> class for compatibility of configuration files between targets and to work with IPluginLogger.
+	// Simple class that manages saving <see cref="P:Torch.Persistent`1.Data" /> to disk using XML serialization.
+	// Can automatically save on changes by implementing <see cref="T:System.ComponentModel.INotifyPropertyChanged" /> in the data class.
+	/// <typeparam name="T">Data class type</typeparam>
+	public class PersistentConfig<T> : IDisposable where T : class, INotifyPropertyChanged, new()
 	{
-		get;
-	}
+		private T data;
+		private Timer saveConfigTimer;
+		private const int SaveDelay = 500;
 
-	public T Data
-	{
-		get => data;
-		private set
+		private string Path
 		{
-			if (data != null)
-				data.PropertyChanged -= OnPropertyChanged;
-
-			data = value;
-			data.PropertyChanged += OnPropertyChanged;
+			get;
 		}
-	}
 
-	~PersistentConfig() => Dispose();
-
-	private PersistentConfig(string path, T data = null)
-	{
-		Path = path;
-		Data = data;
-	}
-
-	private void SaveLater()
-	{
-		if (saveConfigTimer == null)
-			saveConfigTimer = new Timer(x => Save());
-
-		saveConfigTimer.Change(SaveDelay, -1);
-	}
-
-	private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) => SaveLater();
-
-	public static PersistentConfig<T> Load(string path)
-	{
-		try
+		public T Data
 		{
-			if (File.Exists(path))
+			get => data;
+			private set
 			{
-				var xmlSerializer = new XmlSerializer(typeof(T));
-				using (var streamReader = File.OpenText(path))
-					return new PersistentConfig<T>(path, (T)xmlSerializer.Deserialize(streamReader));
+				if (data != null)
+					data.PropertyChanged -= OnPropertyChanged;
+
+				data = value;
+				data.PropertyChanged += OnPropertyChanged;
 			}
 		}
-		catch (Exception e)
+
+		~PersistentConfig() => Dispose();
+
+		private PersistentConfig(string path, T data = null)
 		{
-			Logger.Error(e, "Failed to load configuration file: {0}", path);
+			Path = path;
+			Data = data;
+		}
+
+		private void SaveLater()
+		{
+			if (saveConfigTimer == null)
+				saveConfigTimer = new Timer(x => Save());
+
+			saveConfigTimer.Change(SaveDelay, -1);
+		}
+
+		private void OnPropertyChanged(object sender, PropertyChangedEventArgs e) => SaveLater();
+
+		public static PersistentConfig<T> Load(string path)
+		{
 			try
 			{
-				var timestamp = DateTime.Now.ToString("yyyyMMdd-hhmmss");
-				var corruptedPath = $"{path}.corrupted.{timestamp}.txt";
-				Logger.Info("Moving corrupted configuration file: {0} => {1}", path, corruptedPath);
-				File.Move(path, corruptedPath);
+				if (File.Exists(path))
+				{
+					var xmlSerializer = new XmlSerializer(typeof(T));
+					using (var streamReader = File.OpenText(path))
+						return new PersistentConfig<T>(path, (T)xmlSerializer.Deserialize(streamReader));
+				}
 			}
-			catch (Exception)
+			catch (Exception e)
+			{
+				Logger.Error(e, "Failed to load configuration file: {0}", path);
+				try
+				{
+					var timestamp = DateTime.Now.ToString("yyyyMMdd-hhmmss");
+					var corruptedPath = $"{path}.corrupted.{timestamp}.txt";
+					Logger.Info("Moving corrupted configuration file: {0} => {1}", path, corruptedPath);
+					File.Move(path, corruptedPath);
+				}
+				catch (Exception)
+				{
+					// Ignored
+				}
+			}
+
+			MyLog.Default.WriteLine($"SpaceEngineersVR: Writing default configuration file: {path}");
+			var config = new PersistentConfig<T>(path, new T());
+			config.Save();
+			return config;
+		}
+
+		private void Save(string path = null)
+		{
+			if (path == null)
+				path = Path;
+
+			// NOTE: There is a minimal chance of inconsistency here if the config data
+			// is changed concurrently, but it is negligible in practice. Also, it would be
+			// corrected by the next scheduled save operation after SaveDelay milliseconds.
+			using (var text = File.CreateText(path))
+				new XmlSerializer(typeof(T)).Serialize(text, Data);
+		}
+
+		public void Dispose()
+		{
+			try
+			{
+				if (Data is INotifyPropertyChanged d)
+					d.PropertyChanged -= OnPropertyChanged;
+
+				saveConfigTimer?.Dispose();
+				Save();
+			}
+			catch
 			{
 				// Ignored
 			}
-		}
-
-		MyLog.Default.WriteLine($"SpaceEngineersVR: Writing default configuration file: {path}");
-		var config = new PersistentConfig<T>(path, new T());
-		config.Save();
-		return config;
-	}
-
-	private void Save(string path = null)
-	{
-		if (path == null)
-			path = Path;
-
-		// NOTE: There is a minimal chance of inconsistency here if the config data
-		// is changed concurrently, but it is negligible in practice. Also, it would be
-		// corrected by the next scheduled save operation after SaveDelay milliseconds.
-		using (var text = File.CreateText(path))
-			new XmlSerializer(typeof(T)).Serialize(text, Data);
-	}
-
-	public void Dispose()
-	{
-		try
-		{
-			if (Data is INotifyPropertyChanged d)
-				d.PropertyChanged -= OnPropertyChanged;
-
-			saveConfigTimer?.Dispose();
-			Save();
-		}
-		catch
-		{
-			// Ignored
 		}
 	}
 }

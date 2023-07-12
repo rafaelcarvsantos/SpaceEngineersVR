@@ -3,33 +3,34 @@ using System;
 using System.Drawing;
 using System.IO;
 
-namespace SpaceEngineersVR.Plugin;
-
-public static class Common
+namespace SpaceEngineersVR.Plugin
 {
-	public static Main Plugin
+	public static class Common
 	{
-		get; private set;
-	}
-	public static PluginConfig Config
-	{
-		get; private set;
-	}
+		public static Main Plugin
+		{
+			get; private set;
+		}
+		public static PluginConfig Config
+		{
+			get; private set;
+		}
 
-	public static readonly string Name = "SpaceEngineersVR";
-	public static readonly string PublicName = "Space Engineers VR";
-	public static readonly string ShortName = "SEVR";
+		public static readonly string Name = "SpaceEngineersVR";
+		public static readonly string PublicName = "Space Engineers VR";
+		public static readonly string ShortName = "SEVR";
 
-	public static readonly Version Version = typeof(Main).Assembly.GetName().Version;
+		public static readonly Version Version = typeof(Main).Assembly.GetName().Version;
 
-	public static readonly Icon Icon = new Icon(Path.Combine(Util.Util.GetAssetFolder(), "icon.ico"));
-	public static readonly string IconPngPath = Path.Combine(Util.Util.GetAssetFolder(), "logo.png");
-	public static readonly string IconIcoPath = Path.Combine(Util.Util.GetAssetFolder(), "logo.ico");
+		public static readonly Icon Icon = new Icon(Path.Combine(Util.Util.GetAssetFolder(), "icon.ico"));
+		public static readonly string IconPngPath = Path.Combine(Util.Util.GetAssetFolder(), "logo.png");
+		public static readonly string IconIcoPath = Path.Combine(Util.Util.GetAssetFolder(), "logo.ico");
 
-	public static readonly string ActionJsonPath = Path.Combine(Util.Util.GetAssetFolder(), "Controls", "actions.json");
-	public static void SetPlugin(Main plugin)
-	{
-		Plugin = plugin;
-		Config = plugin.Config;
+		public static readonly string ActionJsonPath = Path.Combine(Util.Util.GetAssetFolder(), "Controls", "actions.json");
+		public static void SetPlugin(Main plugin)
+		{
+			Plugin = plugin;
+			Config = plugin.Config;
+		}
 	}
 }

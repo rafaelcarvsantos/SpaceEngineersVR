@@ -2,18 +2,19 @@
 using Sandbox.Game.Gui;
 using SpaceEngineersVR.Player.Components;
 
-namespace SpaceEngineersVR.Patches;
-
-[HarmonyPatch(typeof(MyGuiScreenGamePlay))]
-public static class MyGuiScreenGamePlayPatch
+namespace SpaceEngineersVR.Patches
 {
-	[HarmonyPrefix]
-	[HarmonyPatch(nameof(MyGuiScreenGamePlay.MoveAndRotatePlayerOrCamera))]
-	public static bool Prefix()
+	[HarmonyPatch(typeof(MyGuiScreenGamePlay))]
+	public static class MyGuiScreenGamePlayPatch
 	{
-		if (VRMovementComponent.UsingControllerMovement)
-			return false;
+		[HarmonyPrefix]
+		[HarmonyPatch(nameof(MyGuiScreenGamePlay.MoveAndRotatePlayerOrCamera))]
+		public static bool Prefix()
+		{
+			if (VRMovementComponent.UsingControllerMovement)
+				return false;
 
-		return Plugin.Common.Config.enableKeyboardAndMouseControls;
+			return Plugin.Common.Config.enableKeyboardAndMouseControls;
+		}
 	}
 }
