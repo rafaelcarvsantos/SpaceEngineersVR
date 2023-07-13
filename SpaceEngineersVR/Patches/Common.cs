@@ -36,7 +36,11 @@ namespace SpaceEngineersVR.Patches
 		//Method to be used in transpiled code, designed to have the same signature as MyCharacter.GetHeadMatrix for easy replacement
 		public static MatrixD GetHandMatrix(MyCharacter character, bool includeY, bool includeX = true, bool forceHeadAnim = false, bool forceHeadBone = false, bool preferLocalOverSync = false)
 		{
-			return GetActiveHand(character)?.world ?? character.GetHeadMatrix(includeY, includeX, forceHeadAnim, forceHeadBone, preferLocalOverSync);
+			MatrixD result = GetActiveHand(character)?.world ?? character.GetHeadMatrix(includeY, includeX, forceHeadAnim, forceHeadBone, preferLocalOverSync);
+
+			//Util.Util.DrawDebugMatrix(result, "Hand");
+
+			return result;
 		}
 
 

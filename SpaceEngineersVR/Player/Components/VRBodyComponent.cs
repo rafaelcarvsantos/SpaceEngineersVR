@@ -217,8 +217,6 @@ namespace SpaceEngineersVR.Player.Components
 				local.Orthogonalize();
 				MatrixD world = local * charHeadMatrix;
 
-				Util.Util.DrawDebugMatrix(world, "Hand");
-
 				return new Hand(world, local);
 			}
 

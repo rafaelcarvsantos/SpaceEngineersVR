@@ -64,7 +64,7 @@ namespace SpaceEngineersVR.Config
 		public static readonly SliderData HandActivationYawData = new SliderData(-180f, 180f, 0f);
 		private float handActivationYawValue = MathHelper.ToRadians(HandActivationYawData.initial);
 
-		public static readonly SliderData HandAimPitchData = new SliderData(-180f, 180f, 0f);
+		public static readonly SliderData HandAimPitchData = new SliderData(-180f, 180f, -60f);
 		private float handAimPitchValue = MathHelper.ToRadians(HandAimPitchData.initial);
 		public static readonly SliderData HandAimYawData = new SliderData(-180f, 180f, 0f);
 		private float handAimYawValue = MathHelper.ToRadians(HandAimYawData.initial);
