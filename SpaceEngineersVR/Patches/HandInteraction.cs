@@ -16,15 +16,12 @@ namespace SpaceEngineersVR.Patches
 	{
 		static HandInteraction()
 		{
-			Harmony.DEBUG = true;
 			HarmonyMethod doDetectionPrefix = new HarmonyMethod(typeof(HandInteraction), nameof(Prefix_DoDetection));
 			HarmonyMethod doDetectionTranspiler = new HarmonyMethod(typeof(HandInteraction), nameof(Transpiler_DoDetection));
 			Common.Harmony.Patch(AccessTools.Method(typeof(MyCharacterRaycastDetectorComponent), "DoDetection"), prefix: doDetectionPrefix, transpiler: doDetectionTranspiler);
 			Common.Harmony.Patch(AccessTools.Method(typeof(MyCharacterShapecastDetectorComponent), "DoDetection", parameters: new Type[] { typeof(bool) }), prefix: doDetectionPrefix, transpiler: doDetectionTranspiler);
 			Common.Harmony.Patch(AccessTools.Method(typeof(MyCharacterShapecastDetectorComponent), "DoDetection", parameters: new Type[] { typeof(bool), typeof(bool) }), prefix: doDetectionPrefix, transpiler: doDetectionTranspiler);
 			Common.Harmony.Patch(AccessTools.Method("Sandbox.Game.Entities.Character.Components.MyCharacterClosestDetectorComponent:DoDetection"), prefix: doDetectionPrefix, transpiler: doDetectionTranspiler);
-
-			Harmony.DEBUG = false;
 
 			Logger.Info("Applied harmony game injections for hand interaction.");
 		}
