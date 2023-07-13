@@ -21,12 +21,15 @@ namespace SpaceEngineersVR.Player.Components
 
 		public enum MovementType
 		{
+			Character,
 			Head,
-			Hand
+			Hand,
 		}
 
+		//TODO: support for non-smooth rotating
 		private RotationType rotationType = RotationType.Continuous;
-		private MovementType movementType = MovementType.Head;
+		//TODO: support for head-oriented and controller-oriented movement
+		private MovementType movementType = MovementType.Character;
 
 		private Vector2 previousRotation = Vector2.Zero;
 		private Vector2I hasSnapped = Vector2I.Zero;
@@ -49,7 +52,7 @@ namespace SpaceEngineersVR.Player.Components
 
 		public override void OnAddedToContainer()
 		{
-			this.NeedsUpdateBeforeSimulation = true;
+			NeedsUpdateBeforeSimulation = true;
 		}
 
 		private void Init()
@@ -94,7 +97,7 @@ namespace SpaceEngineersVR.Player.Components
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		void ControlShip()
+		private void ControlShip()
 		{
 			Vector3 move = Vector3.Zero;
 			Vector2 rotate = Vector2.Zero;
@@ -176,7 +179,7 @@ namespace SpaceEngineersVR.Player.Components
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		void ControlWalk()
+		private void ControlWalk()
 		{
 			Controls.Walking.Update();
 
@@ -214,7 +217,7 @@ namespace SpaceEngineersVR.Player.Components
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		void ControlFlight()
+		private void ControlFlight()
 		{
 			Vector3 move = Vector3.Zero;
 			Vector2 rotate = Vector2.Zero;
@@ -224,14 +227,14 @@ namespace SpaceEngineersVR.Player.Components
 
 			if (Controls.Flight.ThrustLRUD.active)
 			{
-				var v = Controls.Flight.ThrustLRUD.position;
+				Vector3 v = Controls.Flight.ThrustLRUD.position;
 				move.X += v.X;
 				move.Y += v.Y;
 			}
 
 			if (Controls.Flight.ThrustLRFB.active)
 			{
-				var v = Controls.Flight.ThrustLRFB.position;
+				Vector3 v = Controls.Flight.ThrustLRFB.position;
 				move.X += v.X;
 				move.Z -= v.Y;
 			}
@@ -290,7 +293,7 @@ namespace SpaceEngineersVR.Player.Components
 		}
 
 
-		void OrientateCharacterToHMD()
+		private void OrientateCharacterToHMD()
 		{
 			//Matrix absoluteRotation = Main.Headset.hmdAbsolute;
 			//absoluteRotation *= rotationOffset;
@@ -303,7 +306,7 @@ namespace SpaceEngineersVR.Player.Components
 		}
 
 
-		void ApplyMoveAndRotation(Vector3 move, Vector2 rotate, float roll)
+		private void ApplyMoveAndRotation(Vector3 move, Vector2 rotate, float roll)
 		{
 			move = Vector3.Clamp(move, -Vector3.One, Vector3.One);
 
@@ -321,7 +324,7 @@ namespace SpaceEngineersVR.Player.Components
 				}
 			}
 
-			// Setting this statis variable is required to prevent the game from
+			// Setting this static variable is required to prevent the game from
 			// zeroing out the control input. Do not optimize this.
 			// See MyGuiScreenGamePlayPatch on how this flag is used 
 			UsingControllerMovement = move != Vector3.Zero || rotate != Vector2.Zero || roll != 0f;
@@ -334,7 +337,7 @@ namespace SpaceEngineersVR.Player.Components
 
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		void ControlCommonFunctions()
+		private void ControlCommonFunctions()
 		{
 			IMyControllableEntity controlledEntity = MySession.Static.ControlledEntity;
 

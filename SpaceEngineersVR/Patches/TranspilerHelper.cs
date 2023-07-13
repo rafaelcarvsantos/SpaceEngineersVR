@@ -41,6 +41,7 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 		public CodeGap next => new CodeGap(index + 1);
 	}
 
+	//A range of code instructions. May become invalid if the code is mutated!
 	public struct CodeRange : IEnumerable<CodeInstructionIndex>
 	{
 		public CodeRange(CodeGap begin, int count)
@@ -141,6 +142,8 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 		public CodeGap Begin() => new CodeGap(0);
 		public CodeGap End() => new CodeGap(instructions.Count);
 
+		//Inserts the code into the given position, moving labels and blocks if requested
+		//Returns a range covering the inserted code
 		public CodeRange Insert(CodeGap position, MoveLabels moveLabels, MoveBlocks moveBlocks, params CodeInstruction[] code)
 		{
 			if (moveLabels == MoveLabels.MoveToInsertedCode)
@@ -151,6 +154,8 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 			instructions.InsertRange(position.index, code);
 			return new CodeRange(position, code.Length);
 		}
+		//Inserts the code into the given position, moving labels and blocks if requested, and shifts the given position to point after the newly inserted code
+		//Returns a range covering the inserted code
 		public CodeRange InsertAndAdvance(ref CodeGap position, MoveLabels moveLabels, MoveBlocks moveBlocks, params CodeInstruction[] code)
 		{
 			CodeRange range = Insert(position, moveLabels, moveBlocks, code);
@@ -158,28 +163,31 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 			return range;
 		}
 
-		public void Remove(CodeInstructionIndex remove, CodeInstructionIndex moveLabelsTo)
+		//Removes a single code instruction, moving labels and blocks to the code instruction index given
+		public void Remove(CodeInstructionIndex remove, CodeInstructionIndex moveLabelsAndBlocksTo)
 		{
-			if (moveLabelsTo.index == remove.index)
-				throw new ArgumentException("Can not move labels to a code instruction which will be removed", "moveLabelsTo");
+			if (moveLabelsAndBlocksTo.index == remove.index)
+				throw new ArgumentException("Can not move labels to a code instruction which will be removed", "moveLabelsAndBlocksTo");
 
-			this[moveLabelsTo].labels.AddRange(this[remove].labels);
-			this[moveLabelsTo].blocks.AddRange(this[remove].blocks);
+			this[moveLabelsAndBlocksTo].labels.AddRange(this[remove].labels);
+			this[moveLabelsAndBlocksTo].blocks.AddRange(this[remove].blocks);
 			instructions.RemoveAt(remove.index);
 		}
-		public void Remove(CodeRange range, CodeInstructionIndex moveLabelsTo)
+		//Removes a range of code instructions, moving labels and blocks to the code instruction index given
+		public void Remove(CodeRange range, CodeInstructionIndex moveLabelsAndBlocksTo)
 		{
-			if (range.Contains(moveLabelsTo))
-				throw new ArgumentException("Can not move labels to a code instruction which will be removed", "moveLabelsTo");
+			if (range.Contains(moveLabelsAndBlocksTo))
+				throw new ArgumentException("Can not move labels to a code instruction which will be removed", "moveLabelsAndBlocksTo");
 
 			for (int i = 0; i < range.count; ++i)
 			{
-				this[moveLabelsTo].labels.AddRange(instructions[range.begin.index + i].labels);
-				this[moveLabelsTo].blocks.AddRange(instructions[range.begin.index + i].blocks);
+				this[moveLabelsAndBlocksTo].labels.AddRange(instructions[range.begin.index + i].labels);
+				this[moveLabelsAndBlocksTo].blocks.AddRange(instructions[range.begin.index + i].blocks);
 			}
 			instructions.RemoveRange(range.begin.index, range.count);
 		}
 
+		//Replaces a single code instruction with another, moving labels and blocks to the new instruction
 		public void Replace(CodeInstructionIndex replace, CodeInstruction replaceWith)
 		{
 			if (replaceWith.labels.IsNullOrEmpty())
@@ -195,6 +203,8 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 			instructions[replace.index] = replaceWith;
 		}
 
+		//Replaces a range of code instructions from the given first instruction, with a count equal to the number of instructions given. I.e. the final instruction count remains unchanged
+		//Labels and blocks are moved to the new instructions in the same positions as they were before
 		public CodeRange ReplaceRange(CodeInstructionIndex first, params CodeInstruction[] code)
 		{
 			for (int i = 0; i < code.Length; ++i)
@@ -203,6 +213,8 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 			}
 			return new CodeRange(first, code.Length);
 		}
+		//Replaces a range of code instructions from the given begining of the range, with a count equal to the number of instructions given. I.e. the final instruction count remains unchanged
+		//Labels and blocks are moved to the new instructions in the same positions as they were before
 		public CodeRange ReplaceRange(CodeGap begin, params CodeInstruction[] code)
 		{
 			for (int i = 0; i < code.Length; ++i)
@@ -211,6 +223,7 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 			}
 			return new CodeRange(First(), code.Length);
 		}
+
 		/*
 		TODO: move labels and blocks somewhere?? not sure how to decide where. parameter? first code statement being replaced?
 		public CodeRange ReplaceRange(CodePosition start, int count, params CodeInstruction[] code)
@@ -237,16 +250,18 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 		*/
 
 
-		public bool InstructionsPassPredicates(CodeInstructionIndex index, params Predicate<CodeInstruction>[] predicates)
+		//Checks if each instruction from (and including) the given first instruction matches the corrisponding predicate
+		public bool InstructionsPassPredicates(CodeInstructionIndex first, params Predicate<CodeInstruction>[] predicates)
 		{
 			for (int i = 0; i < predicates.Length; ++i)
 			{
-				if (!predicates[i](this[new CodeInstructionIndex(index.index + i)]))
+				if (!predicates[i](this[new CodeInstructionIndex(first.index + i)]))
 					return false;
 			}
 			return true;
 		}
 
+		//Finds the first code instruction index within the given range that matches the predicate, if any
 		public CodeInstructionIndex? FindFirst(CodeRange withinRange, Predicate<CodeInstruction> predicate)
 		{
 			foreach (CodeInstructionIndex i in withinRange)
@@ -256,15 +271,18 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 			}
 			return null;
 		}
-		public CodeInstructionIndex? FindFirst(CodeInstructionIndex start, Predicate<CodeInstruction> predicate)
+		//Finds the first code instruction index after the given position that matches the predicate, if any
+		public CodeInstructionIndex? FindFirst(CodeGap after, Predicate<CodeInstruction> predicate)
 		{
-			return FindFirst(new CodeRange(start, Last()), predicate);
+			return FindFirst(new CodeRange(after, End()), predicate);
 		}
+		//Finds the first code instruction index that matches the predicate, if any
 		public CodeInstructionIndex? FindFirst(Predicate<CodeInstruction> predicate)
 		{
 			return FindFirst(All(), predicate);
 		}
 
+		//Finds the first range of code instructions within the given range that match the predicates in order, if any
 		public CodeRange? FindFirst(CodeRange withinRange, params Predicate<CodeInstruction>[] predicates)
 		{
 			foreach (CodeInstructionIndex i in withinRange)
@@ -274,33 +292,39 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 			}
 			return null;
 		}
-		public CodeRange? FindFirst(CodeInstructionIndex start, params Predicate<CodeInstruction>[] predicates)
+		//Finds the first range of code instructions after the given position that match the predicates in order, if any
+		public CodeRange? FindFirst(CodeGap after, params Predicate<CodeInstruction>[] predicates)
 		{
-			return FindFirst(new CodeRange(start, Last()), predicates);
+			return FindFirst(new CodeRange(after, End()), predicates);
 		}
+		//Finds the first range of code instructions that match the predicates in order, if any
 		public CodeRange? FindFirst(params Predicate<CodeInstruction>[] predicates)
 		{
 			return FindFirst(All(), predicates);
 		}
 
-		public CodeInstructionIndex? FindLast(CodeRange range, Predicate<CodeInstruction> predicate)
+		//Finds the last code instruction index within the given range that matches the predicate, if any
+		public CodeInstructionIndex? FindLast(CodeRange withinRange, Predicate<CodeInstruction> predicate)
 		{
-			foreach (CodeInstructionIndex i in range.Reverse())
+			foreach (CodeInstructionIndex i in withinRange.Reverse())
 			{
 				if (predicate(this[i]))
 					return i;
 			}
 			return null;
 		}
-		public CodeInstructionIndex? FindLast(CodeInstructionIndex last, Predicate<CodeInstruction> predicate)
+		//Finds the last code instruction index before the given position that matches the predicate, if any
+		public CodeInstructionIndex? FindLast(CodeGap before, Predicate<CodeInstruction> predicate)
 		{
-			return FindLast(new CodeRange(First(), last), predicate);
+			return FindLast(new CodeRange(Begin(), before), predicate);
 		}
+		//Finds the last code instruction index that matches the predicate, if any
 		public CodeInstructionIndex? FindLast(Predicate<CodeInstruction> predicate)
 		{
 			return FindLast(All(), predicate);
 		}
 
+		//Finds the last range of code instructions within the given range that match the predicates in order, if any
 		public CodeRange? FindLast(CodeRange range, params Predicate<CodeInstruction>[] predicates)
 		{
 			foreach (CodeInstructionIndex i in range.Reverse())
@@ -310,66 +334,77 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 			}
 			return null;
 		}
-		public CodeRange? FindLast(CodeInstructionIndex last, params Predicate<CodeInstruction>[] predicates)
+		//Finds the last range of code instructions before the given position that match the predicates in order, if any
+		public CodeRange? FindLast(CodeGap before, params Predicate<CodeInstruction>[] predicates)
 		{
-			return FindLast(new CodeRange(First(), last), predicates);
+			return FindLast(new CodeRange(Begin(), before), predicates);
 		}
+		//Finds the last range of code instructions that match the predicates in order, if any
 		public CodeRange? FindLast(params Predicate<CodeInstruction>[] predicates)
 		{
 			return FindLast(All(), predicates);
 		}
 
-		public IEnumerable<CodeInstructionIndex> FindEach(CodeRange range, Predicate<CodeInstruction> predicate)
+		//Yields each code instruction within the given range that matches the given predicate
+		public IEnumerable<CodeInstructionIndex> FindEach(CodeRange withinRange, Predicate<CodeInstruction> predicate)
 		{
-			foreach (CodeInstructionIndex i in range)
+			foreach (CodeInstructionIndex i in withinRange)
 			{
 				if (predicate(this[i]))
 					yield return i;
 			}
 		}
+		//Yields each code instruction that matches the given predicate
 		public IEnumerable<CodeInstructionIndex> FindEach(Predicate<CodeInstruction> predicate)
 		{
 			return FindEach(All(), predicate);
 		}
-		public IEnumerable<CodeRange> FindEach(CodeRange range, params Predicate<CodeInstruction>[] predicates)
+		//Yields each range of instructions within the given range that match the given predicates in order
+		public IEnumerable<CodeRange> FindEach(CodeRange withinRange, params Predicate<CodeInstruction>[] predicates)
 		{
-			foreach (CodeInstructionIndex i in range)
+			foreach (CodeInstructionIndex i in withinRange)
 			{
 				if (InstructionsPassPredicates(i, predicates))
 					yield return new CodeRange(i, predicates.Length);
 			}
 		}
+		//Yields each range of instructions that match the given predicates in order
 		public IEnumerable<CodeRange> FindEach(params Predicate<CodeInstruction>[] predicates)
 		{
 			return FindEach(All(), predicates);
 		}
 
-		public IEnumerable<CodeInstructionIndex> FindEachReversed(CodeRange range, Predicate<CodeInstruction> predicate)
+		//Yields each code instruction within the given range that matches the given predicate, in reversed order. Useful if you will mutate the contents
+		public IEnumerable<CodeInstructionIndex> FindEachReversed(CodeRange withinRange, Predicate<CodeInstruction> predicate)
 		{
-			foreach (CodeInstructionIndex i in range.Reverse())
+			foreach (CodeInstructionIndex i in withinRange.Reverse())
 			{
 				if (predicate(this[i]))
 					yield return i;
 			}
 		}
+		//Yields each code instruction that matches the given predicate, in reversed order. Useful if you will mutate the contents
 		public IEnumerable<CodeInstructionIndex> FindEachReversed(Predicate<CodeInstruction> predicate)
 		{
 			return FindEachReversed(All(), predicate);
 		}
-		public IEnumerable<CodeRange> FindEachReversed(CodeRange range, params Predicate<CodeInstruction>[] predicates)
+		//Yields each range of instructions within the given range that match the given predicate, in reversed order. Useful if you will mutate the contents
+		public IEnumerable<CodeRange> FindEachReversed(CodeRange withinRange, params Predicate<CodeInstruction>[] predicates)
 		{
-			foreach (CodeInstructionIndex i in range.Reverse())
+			foreach (CodeInstructionIndex i in withinRange.Reverse())
 			{
 				if (InstructionsPassPredicates(i, predicates))
 					yield return new CodeRange(i, predicates.Length);
 			}
 		}
+		//Yields each range of instructions that match the given predicate, in reversed order. Useful if you will mutate the contents
 		public IEnumerable<CodeRange> FindEachReversed(params Predicate<CodeInstruction>[] predicates)
 		{
 			return FindEachReversed(All(), predicates);
 		}
 
 
+		//Returns the index and label that a branch goes to, or null if it is not a branch
 		public (CodeInstructionIndex index, Label label)? FollowBranch(CodeInstructionIndex branchIndex)
 		{
 			if (this[branchIndex].Branches(out Label? label))
@@ -384,6 +419,7 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 			return null;
 		}
 
+		//Returns the index and label after an if (and possibly else) statement, or null if it is not a branch
 		public (CodeInstructionIndex index, Label label)? GetPositionAfterIfAndElse(CodeInstructionIndex ifPos)
 		{
 			(CodeInstructionIndex index, Label label)? ifEndPos = FollowBranch(ifPos);
@@ -393,6 +429,8 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 			return null;
 		}
 
+		/*
+		I thought this was working, but after testing, it doesnt seem to be
 		public (CodeInstructionIndex index, Label label)? ReplaceIfElseByJumping(CodeRange ifRange)
 		{
 			//if-else statements typically look like this:
@@ -444,6 +482,7 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 			}
 			return null;
 		}
+		*/
 
 
 		public CodeInstruction this[CodeInstructionIndex pos] => instructions[pos.index];
@@ -460,7 +499,7 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 		}
 	}
 
-	public static class TranspilerHelper2
+	public static class CodeInstructionExtensions
 	{
 		public static bool BranchesUnconditionally(this CodeInstruction self)
 		{

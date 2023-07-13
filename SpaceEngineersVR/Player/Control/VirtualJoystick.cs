@@ -1,17 +1,19 @@
-﻿using System;
+﻿using Sandbox.Game.World;
+using SpaceEngineersVR.Player.Components;
+using System;
 using VRageMath;
 
 namespace SpaceEngineersVR.Player.Control
 {
 	public sealed class VirtualJoystick : IAnalog
 	{
-		public enum ControlType : byte
+		public enum ControlType
 		{
 			Translation,
 			Rotation,
 		}
 		[Flags]
-		public enum Invert : byte
+		public enum Invert
 		{
 			None = 0,
 			InvertX = 1 << 0,
@@ -19,45 +21,59 @@ namespace SpaceEngineersVR.Player.Control
 			InvertZ = 1 << 2,
 		}
 
-		private readonly ControlType controlType;
-		private readonly Invert invert;
+		public ControlType controlType;
+		public Invert invert;
 
-		private readonly OpenVRButton enable;
-		private readonly TrackedDevice device;
+		public readonly OpenVRButton enableButton;
+		public readonly TrackedDevice device;
+
+		public float sensitivity = 1f;
 
 		private Util.MatrixAndInvert startPosToAbsolute;
 		private Util.MatrixAndInvert lastFramePosToStart;
 
-		public bool active => enable.active;
+		public bool active => enableButton.active;
 		public Vector3 position { get; private set; }
 		public Vector3 delta { get; private set; }
 
 
-		public VirtualJoystick(OpenVRButton enable, TrackedDevice device, ControlType controlType, Invert invert)
+		public VirtualJoystick(OpenVRButton enableButton, TrackedDevice device, ControlType controlType, Invert invert, float sensitivity = 1f)
 		{
-			this.enable = enable;
+			this.enableButton = enableButton;
 			this.device = device;
 			this.controlType = controlType;
 			this.invert = invert;
+			this.sensitivity = sensitivity;
 		}
 
 		public void Update()
 		{
-			enable.Update();
+			enableButton.Update();
 
-			if (enable.hasPressed)
+			//VRBodyComponent vrBody = MySession.Static.LocalCharacter?.Components.Get<VRBodyComponent>();
+			//if(vrBody != null)
+			//	Util.Util.DrawDebugMatrix(startPosToAbsolute.matrix * Player.PlayerToAbsolute.inverted * vrBody.playerToCharacter.matrix * vrBody.Character.WorldMatrix, "Virtual Joystick");
+
+			Matrix stick = device.pose.deviceToAbsolute.matrix;
+			(stick.Forward, stick.Up) = (stick.Down, stick.Forward);
+			stick.Translation += stick.Down * 0.1f;
+
+			if (enableButton.hasPressed)
 			{
-				startPosToAbsolute = device.pose.deviceToAbsolute;
+				startPosToAbsolute = new Util.MatrixAndInvert(stick);
 				lastFramePosToStart = Util.MatrixAndInvert.Identity;
 
 				position = Vector3.Zero;
 				delta = Vector3.Zero;
 			}
-			else if (enable.isPressed)
+			else if (enableButton.isPressed)
 			{
-				Matrix pose = device.pose.deviceToAbsolute.matrix * startPosToAbsolute.inverted;
-				Matrix relPose = pose * lastFramePosToStart.inverted;
-				lastFramePosToStart = new Util.MatrixAndInvert(pose);
+				Matrix stickToStart = stick * startPosToAbsolute.inverted;
+				Matrix stickDelta = stickToStart * lastFramePosToStart.inverted;
+				lastFramePosToStart = new Util.MatrixAndInvert(stickToStart);
+
+				//if (vrBody != null)
+				//	Util.Util.DrawDebugMatrix(stick * Player.PlayerToAbsolute.inverted * vrBody.playerToCharacter.matrix * vrBody.Character.WorldMatrix);
 
 				Vector3 newPosition = Vector3.Zero;
 				Vector3 newDelta = Vector3.Zero;
@@ -65,12 +81,12 @@ namespace SpaceEngineersVR.Player.Control
 				switch (controlType)
 				{
 					case ControlType.Translation:
-						newPosition = pose.Translation;
-						newDelta = relPose.Translation;
+						newPosition = stickToStart.Translation;
+						newDelta = stickDelta.Translation;
 						break;
 					case ControlType.Rotation:
-						newPosition = GetAngles(pose);
-						newDelta = GetAngles(relPose);
+						newPosition = GetAngles(stickToStart);
+						newDelta = GetAngles(stickDelta);
 						break;
 				}
 				if (invert.HasFlag(Invert.InvertX))
@@ -89,10 +105,10 @@ namespace SpaceEngineersVR.Player.Control
 					newDelta.Z = -newDelta.Z;
 				}
 
-				position = newPosition;
-				delta = newDelta;
+				position = newPosition * sensitivity;
+				delta = newDelta * sensitivity;
 			}
-			else if (enable.hasReleased)
+			else if (enableButton.hasReleased)
 			{
 				position = Vector3.Zero;
 				delta = Vector3.Zero;
@@ -113,7 +129,7 @@ namespace SpaceEngineersVR.Player.Control
 				Quaternion quat = Quaternion.CreateFromRotationMatrix(mat);
 				quat.GetAxisAngle(out Vector3 axis, out float angle);
 
-				return axis * angle;
+				return -axis * angle;
 			}
 		}
 	}

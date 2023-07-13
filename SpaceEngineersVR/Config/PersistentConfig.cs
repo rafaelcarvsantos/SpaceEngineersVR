@@ -60,8 +60,8 @@ namespace SpaceEngineersVR.Config
 			{
 				if (File.Exists(path))
 				{
-					var xmlSerializer = new XmlSerializer(typeof(T));
-					using (var streamReader = File.OpenText(path))
+					XmlSerializer xmlSerializer = new XmlSerializer(typeof(T));
+					using (StreamReader streamReader = File.OpenText(path))
 						return new PersistentConfig<T>(path, (T)xmlSerializer.Deserialize(streamReader));
 				}
 			}

@@ -46,13 +46,15 @@ namespace SpaceEngineersVR.Util
 			MySimpleObjectDraw.DrawTransparentSphere(ref x, radius, ref color, MySimpleObjectRasterizer.SolidAndWireframe, 1, SQUARE, SQUARE);
 		}
 
-		public static void DrawDebugMatrix(MatrixD matrix, string name)
+		public static void DrawDebugMatrix(MatrixD matrix, string name = null)
 		{
 			Vector3D position = matrix.Translation;
 			DrawDebugRay(position, matrix.Forward, Color.Red);
 			DrawDebugRay(position, matrix.Left, Color.Green);
 			DrawDebugRay(position, matrix.Up, Color.Blue);
-			DrawDebugText(position, name);
+
+			if(name != null)
+				DrawDebugText(position, name);
 		}
 
 		public static void DrawDebugText(Vector3D pos, string text)

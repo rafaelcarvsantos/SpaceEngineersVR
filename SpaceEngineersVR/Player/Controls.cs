@@ -49,42 +49,21 @@ namespace SpaceEngineersVR.Player
 
 		public static class Flight
 		{
-			public static readonly OpenVRAnalog ThrustLRUD;
-			public static readonly OpenVRAnalog ThrustLRFB;
-			public static readonly OpenVRAnalog ThrustUp;
-			public static readonly OpenVRAnalog ThrustDown;
-			public static readonly OpenVRAnalog ThrustForward;
-			public static readonly OpenVRAnalog ThrustBackward;
-			public static readonly OpenVRAnalog RotateYawPitch;
-			public static readonly OpenVRAnalog RotateRoll;
-			public static readonly VirtualJoystick VirtualJoystickLeftThrust;
-			public static readonly VirtualJoystick VirtualJoystickRightThrust;
-			public static readonly VirtualJoystick VirtualJoystickLeftRotate;
-			public static readonly VirtualJoystick VirtualJoystickRightRotate;
-			public static readonly OpenVRButton Dampener;
+			public static readonly OpenVRAnalog ThrustLRUD = new OpenVRAnalog("/actions/flying/in/ThrustLRUD");
+			public static readonly OpenVRAnalog ThrustLRFB = new OpenVRAnalog("/actions/flying/in/ThrustLRFB");
+			public static readonly OpenVRAnalog ThrustUp = new OpenVRAnalog("/actions/flying/in/ThrustUp");
+			public static readonly OpenVRAnalog ThrustDown = new OpenVRAnalog("/actions/flying/in/ThrustDown");
+			public static readonly OpenVRAnalog ThrustForward = new OpenVRAnalog("/actions/flying/in/ThrustForward");
+			public static readonly OpenVRAnalog ThrustBackward = new OpenVRAnalog("/actions/flying/in/ThrustBackward");
+			public static readonly OpenVRAnalog RotateYawPitch = new OpenVRAnalog("/actions/flying/in/RotateYawPitch");
+			public static readonly OpenVRAnalog RotateRoll = new OpenVRAnalog("/actions/flying/in/RotateRoll");
+			public static readonly VirtualJoystick VirtualJoystickLeftThrust = new VirtualJoystick(new OpenVRButton("/actions/flying/in/GrabLeftThrustVirtualJoystick"), Player.Hands.left, VirtualJoystick.ControlType.Translation, VirtualJoystick.Invert.None, 5f);
+			public static readonly VirtualJoystick VirtualJoystickRightThrust = new VirtualJoystick(new OpenVRButton("/actions/flying/in/GrabRightThrustVirtualJoystick"), Player.Hands.right, VirtualJoystick.ControlType.Translation, VirtualJoystick.Invert.None, 5f);
+			public static readonly VirtualJoystick VirtualJoystickLeftRotate = new VirtualJoystick(new OpenVRButton("/actions/flying/in/GrabLeftRotateVirtualJoystick"), Player.Hands.left, VirtualJoystick.ControlType.Rotation, VirtualJoystick.Invert.None, 5f);
+			public static readonly VirtualJoystick VirtualJoystickRightRotate = new VirtualJoystick(new OpenVRButton("/actions/flying/in/GrabRightRotateVirtualJoystick"), Player.Hands.right, VirtualJoystick.ControlType.Rotation, VirtualJoystick.Invert.None, 5f);
+			public static readonly OpenVRButton Dampener = new OpenVRButton("/actions/flying/in/Dampener");
 
-			private static readonly ActionSets ActionSets;
-
-			static Flight()
-			{
-				ThrustLRUD = new OpenVRAnalog("/actions/flying/in/ThrustLRUD");
-				ThrustLRFB = new OpenVRAnalog("/actions/flying/in/ThrustLRFB");
-				ThrustUp = new OpenVRAnalog("/actions/flying/in/ThrustUp");
-				ThrustDown = new OpenVRAnalog("/actions/flying/in/ThrustDown");
-				ThrustForward = new OpenVRAnalog("/actions/flying/in/ThrustForward");
-				ThrustBackward = new OpenVRAnalog("/actions/flying/in/ThrustBackward");
-				RotateYawPitch = new OpenVRAnalog("/actions/flying/in/RotateYawPitch");
-				RotateRoll = new OpenVRAnalog("/actions/flying/in/RotateRoll");
-
-				VirtualJoystickLeftThrust = new VirtualJoystick(new OpenVRButton("/actions/flying/in/GrabLeftThrustVirtualJoystick"), Player.Hands.left, VirtualJoystick.ControlType.Translation, VirtualJoystick.Invert.None);
-				VirtualJoystickRightThrust = new VirtualJoystick(new OpenVRButton("/actions/flying/in/GrabRightThrustVirtualJoystick"), Player.Hands.right, VirtualJoystick.ControlType.Translation, VirtualJoystick.Invert.None);
-				VirtualJoystickLeftRotate = new VirtualJoystick(new OpenVRButton("/actions/flying/in/GrabLeftRotateVirtualJoystick"), Player.Hands.left, VirtualJoystick.ControlType.Rotation, VirtualJoystick.Invert.None);
-				VirtualJoystickRightRotate = new VirtualJoystick(new OpenVRButton("/actions/flying/in/GrabRightRotateVirtualJoystick"), Player.Hands.right, VirtualJoystick.ControlType.Rotation, VirtualJoystick.Invert.None);
-
-				Dampener = new OpenVRButton("/actions/flying/in/Dampener");
-
-				ActionSets = new ActionSets("/actions/flying", "/actions/common");
-			}
+			private static readonly ActionSets ActionSets = new ActionSets("/actions/flying", "/actions/common");
 
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			public static void Update()

@@ -51,11 +51,11 @@ namespace SpaceEngineersVR.Player.Components
 				return Matrix.CreateScale(character.height / player.height);
 			});
 		public static readonly List<ScalingMode> ScalingModes = new List<ScalingMode>()
-	{
-		NoScaling,
-		HeightScaling,
-		ArmSpanScaling,
-	};
+		{
+			NoScaling,
+			HeightScaling,
+			ArmSpanScaling,
+		};
 
 		public static readonly int DefaultScalingMode = 1;
 
@@ -73,10 +73,10 @@ namespace SpaceEngineersVR.Player.Components
 
 		private static readonly MethodInfo CalculateHandIK = HarmonyLib.AccessTools.Method(typeof(MyCharacter), "CalculateHandIK", new Type[]
 		{
-		typeof(int), //startBoneIndex
+			typeof(int), //startBoneIndex
 			typeof(int), //endBoneIndex
 			typeof(MatrixD).MakeByRefType(), //targetTransform
-			});
+		});
 
 		static VRBodyComponent()
 		{

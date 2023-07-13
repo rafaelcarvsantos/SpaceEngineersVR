@@ -78,26 +78,7 @@ namespace SpaceEngineersVR.Player
 
 		public static void RenderUpdate()
 		{
-			//Check for new devices
-			for (; NextDeviceId < OpenVR.k_unMaxTrackedDeviceCount; NextDeviceId++)
-			{
-				//In OpenVR, once a device is connected once, its ID is unique, even if disconnected
-				ETrackedDeviceClass deviceClass = OpenVR.System.GetTrackedDeviceClass(NextDeviceId);
-
-				if (deviceClass == ETrackedDeviceClass.Invalid)
-				{
-					break;
-				}
-
-				if (deviceClass == ETrackedDeviceClass.GenericTracker)
-				{
-					TrackedDevice device = new TrackedDevice
-					{
-						deviceId = NextDeviceId
-					};
-					AllDevices.Add(device);
-				}
-			}
+			CheckForNewDevices();
 
 			OpenVR.Compositor.WaitGetPoses(RenderPoses, RenderPosesFuture);
 
@@ -118,28 +99,6 @@ namespace SpaceEngineersVR.Player
 				Logger.Warning("");
 			}
 
-			{
-				bool lockTaken = false;
-				try
-				{
-					Monitor.TryEnter(SyncPosesLock, ref lockTaken);
-					if (lockTaken)
-					{
-						for (int i = 0; i < OpenVR.k_unMaxTrackedDeviceCount; ++i)
-						{
-							SyncPoses[i] = RenderPoses[i];
-						}
-					}
-				}
-				finally
-				{
-					if (lockTaken)
-					{
-						Monitor.Exit(SyncPosesLock);
-					}
-				}
-			}
-
 			//Vive controllers work out whether they are left or right handed by their relative position to the headset. they can even change at runtime
 			{
 				uint rightHandIndex = OpenVR.System.GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole.RightHand);
@@ -155,6 +114,8 @@ namespace SpaceEngineersVR.Player
 					Hands.left.deviceId = leftHandIndex;
 				}
 			}
+
+			SyncPosesToMainThread();
 
 			{
 				bool lockTaken = false;
@@ -185,14 +146,58 @@ namespace SpaceEngineersVR.Player
 			Headset.RenderUpdate();
 		}
 
+		private static void CheckForNewDevices()
+		{
+			for (; NextDeviceId < OpenVR.k_unMaxTrackedDeviceCount; NextDeviceId++)
+			{
+				//In OpenVR, once a device is connected once, its ID is unique, even if disconnected
+				ETrackedDeviceClass deviceClass = OpenVR.System.GetTrackedDeviceClass(NextDeviceId);
+
+				if (deviceClass == ETrackedDeviceClass.Invalid)
+				{
+					break;
+				}
+
+				if (deviceClass == ETrackedDeviceClass.GenericTracker)
+				{
+					TrackedDevice device = new TrackedDevice
+					{
+						deviceId = NextDeviceId
+					};
+					AllDevices.Add(device);
+				}
+			}
+		}
+
+		private static void SyncPosesToMainThread()
+		{
+			bool lockTaken = false;
+			try
+			{
+				Monitor.TryEnter(SyncPosesLock, ref lockTaken);
+				if (lockTaken)
+				{
+					for (int i = 0; i < OpenVR.k_unMaxTrackedDeviceCount; ++i)
+					{
+						SyncPoses[i] = RenderPoses[i];
+					}
+				}
+			}
+			finally
+			{
+				if (lockTaken)
+				{
+					Monitor.Exit(SyncPosesLock);
+				}
+			}
+		}
+
 		public static void MainUpdate()
 		{
 			try
 			{
 				Monitor.Enter(SyncPosesLock);
-				TrackedDevicePose_t[] tmp = Poses;
-				Poses = SyncPoses;
-				SyncPoses = tmp;
+				(SyncPoses, Poses) = (Poses, SyncPoses);
 			}
 			finally
 			{
