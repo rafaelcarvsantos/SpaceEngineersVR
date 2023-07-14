@@ -7,35 +7,30 @@ namespace SpaceEngineersVR.Wrappers
 {
 	public class BorrowedRtvTexture
 	{
-		public object Instance
-		{
-			get;
-		}
+		public object instance { get; }
 
 		static BorrowedRtvTexture()
 		{
 			Type t = AccessTools.TypeByName("VRage.Render11.Resources.Textures.MyBorrowedTexture");
-			release = t.GetMethod("Release", BindingFlags.Public | BindingFlags.Instance);
-			t = AccessTools.TypeByName("VRage.Render11.Resources.Textures.MyBorrowedRtvTexture");
-			get_Resource = t.GetProperty("Resource", BindingFlags.Public | BindingFlags.Instance).GetGetMethod();
+			ReleaseInfo = t.GetMethod("Release", BindingFlags.Public | BindingFlags.Instance);
+
+			Type myBorrowedRtvTexture = AccessTools.TypeByName("VRage.Render11.Resources.Textures.MyBorrowedRtvTexture");
+			ResourceInfo = myBorrowedRtvTexture.GetProperty("Resource", BindingFlags.Public | BindingFlags.Instance);
 		}
 
 		public BorrowedRtvTexture(object instance)
 		{
-			Instance = instance;
+			this.instance = instance;
 		}
 
-		private static readonly MethodInfo release;
+		private static readonly MethodInfo ReleaseInfo;
 		public void Release()
 		{
-			release.Invoke(Instance, new object[0]);
+			ReleaseInfo.Invoke(instance, new object[0]);
 		}
 
-		private static readonly MethodInfo get_Resource;
-		public Texture2D GetResource()
-		{
-			return (Texture2D)get_Resource.Invoke(Instance, new object[0]);
-		}
+		private static readonly PropertyInfo ResourceInfo;
+		public Texture2D resource => (Texture2D)ResourceInfo.GetValue(instance, new object[0]);
 
 	}
 }

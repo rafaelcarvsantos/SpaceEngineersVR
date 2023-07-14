@@ -126,6 +126,10 @@ namespace SpaceEngineersVR.Patches.TranspilerHelper
 
 	public class TranspilerHelper : IEnumerable<CodeInstruction>
 	{
+		public TranspilerHelper(List<CodeInstruction> instructions)
+		{
+			this.instructions = instructions;
+		}
 		public TranspilerHelper(IEnumerable<CodeInstruction> instructions)
 		{
 			this.instructions = new List<CodeInstruction>(instructions);

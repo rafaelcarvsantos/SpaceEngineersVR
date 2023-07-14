@@ -160,7 +160,7 @@ namespace SpaceEngineersVR.Player
 			MyRender11.DrawGameScene(texture, out debugAmbientOcclusion);
 			MyRender11.DrawDebugScene(debugAmbientOcclusion);
 
-			Texture2D texture2D = texture.GetResource();
+			Texture2D texture2D = texture.resource;
 			Texture_t input = new Texture_t
 			{
 				eColorSpace = EColorSpace.Auto,
@@ -180,7 +180,7 @@ namespace SpaceEngineersVR.Player
 
 			envMats.CameraPosition = cameraPosition;
 			envMats.ViewD = viewMatrix;
-			envMats.InvViewD = MatrixD.Invert(viewMatrix);
+			envMats.InvViewD = worldMat;
 
 			MatrixD viewAt0 = viewMatrix;
 			viewAt0.M14 = 0.0;
@@ -204,9 +204,6 @@ namespace SpaceEngineersVR.Player
 			MatrixD viewProjectionAt0 = viewAt0 * projection;
 			envMats.ViewProjectionAt0 = viewProjectionAt0;
 			envMats.InvViewProjectionAt0 = MatrixD.Invert(viewProjectionAt0);
-
-			//TODO: add a way to write to this
-			//VRage.Render11.Scene.MyScene11.Instance.Environment.CameraPosition = cameraPosition;
 		}
 
 		private static MatrixD GetPerspectiveFovRhInfiniteComplementary(EVREye eye, double nearPlane)

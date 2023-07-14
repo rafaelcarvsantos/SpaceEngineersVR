@@ -532,6 +532,7 @@
   <ItemGroup>
     <Compile Include="Config\PersistentConfig.cs" />
     <Compile Include="Config\PluginConfig.cs" />
+    <Compile Include="GUI\MouseOverlay.cs" />
     <Compile Include="GUI\MyPluginConfigDialog.cs" />
     <Compile Include="Patches\TranspilerHelper.cs" />
     <Compile Include="Patches\Common.cs" />
@@ -542,7 +543,7 @@
     <Compile Include="Player\Control\Analog.cs" />
     <Compile Include="Player\Control\Control.cs" />
     <Compile Include="Player\Control\VirtualJoystick.cs" />
-    <Compile Include="Player\VRGUIManager.cs" />
+    <Compile Include="GUI\VRGUIManager.cs" />
     <Compile Include="Player\Components\VRMovementComponent.cs" />
     <Compile Include="Player\Components\VRBodyComponent.cs" />
     <Compile Include="Player\Controller.cs" />
@@ -571,6 +572,7 @@
     <Compile Include="Wrappers\MyManagers.cs" />
     <Compile Include="Wrappers\MyRender11.cs" />
     <Compile Include="Wrappers\MyRenderContext.cs" />
+    <Compile Include="Wrappers\MySpritesManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Assets\Controls\.vrmanifest" />

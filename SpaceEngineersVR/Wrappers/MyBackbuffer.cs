@@ -7,34 +7,35 @@ namespace SpaceEngineersVR.Wrappers
 {
 	public class MyBackbuffer
 	{
-		public object Instance
-		{
-			get;
-		}
+		public object instance { get; }
 
 		static MyBackbuffer()
 		{
 			Type t = AccessTools.TypeByName("VRage.Render11.Resources.MyBackbuffer");
-			release = t.GetMethod("Release", BindingFlags.Public | BindingFlags.Instance);
-			get_Resource = t.GetProperty("Resource", BindingFlags.Public | BindingFlags.Instance).GetGetMethod();
+			ReleaseInfo = t.GetMethod("Release", BindingFlags.Public | BindingFlags.Instance);
+			ResourceInfo = t.GetProperty("Resource", BindingFlags.Public | BindingFlags.Instance);
+			RtvInfo = t.GetProperty("Rtv", BindingFlags.Public | BindingFlags.Instance);
 		}
 
 		public MyBackbuffer(object instance)
 		{
-			Instance = instance;
+			this.instance = instance;
 		}
 
-		private static readonly MethodInfo release;
+		private static readonly MethodInfo ReleaseInfo;
 		public void Release()
 		{
-			release.Invoke(Instance, new object[0]);
+			ReleaseInfo.Invoke(instance, new object[0]);
 		}
 
-		private static readonly MethodInfo get_Resource;
-		public Resource GetResource()
+		private static readonly PropertyInfo ResourceInfo;
+		public Resource resource => (Resource)ResourceInfo.GetValue(instance, new object[0]);
+
+		private static readonly PropertyInfo RtvInfo;
+		public static void SetBackbufferValues(MyBackbuffer instance, object targetInstance)
 		{
-			return (Resource)get_Resource.Invoke(Instance, new object[0]);
+			RtvInfo.SetValue(targetInstance, instance.rtv);
 		}
-
+		public RenderTargetView rtv => (RenderTargetView)RtvInfo.GetValue(instance);
 	}
 }
