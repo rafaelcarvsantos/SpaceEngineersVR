@@ -70,5 +70,27 @@ namespace SpaceEngineersVR.Util
 				hmd.m2, hmd.m6, hmd.m10, hmd.m14,
 				hmd.m3, hmd.m7, hmd.m11, hmd.m15);
 		}
+
+		public static HmdMatrix34_t ToHMDMatrix34(this Matrix mat)
+		{
+			return new HmdMatrix34_t()
+			{
+				m0 = mat.M11, m4 = mat.M12, m8  = mat.M13,
+				m1 = mat.M21, m5 = mat.M22, m9  = mat.M23,
+				m2 = mat.M31, m6 = mat.M32, m10 = mat.M33,
+				m3 = mat.M41, m7 = mat.M42, m11 = mat.M43
+			};
+		}
+
+		public static HmdMatrix44_t ToHMDMatrix44(this Matrix mat)
+		{
+			return new HmdMatrix44_t()
+			{
+				m0 = mat.M11, m4 = mat.M12, m8  = mat.M13, m12 = mat.M14,
+				m1 = mat.M21, m5 = mat.M22, m9  = mat.M23, m13 = mat.M24,
+				m2 = mat.M31, m6 = mat.M32, m10 = mat.M33, m14 = mat.M34,
+				m3 = mat.M43, m7 = mat.M42, m11 = mat.M43, m15 = mat.M44
+			};
+		}
 	}
 }

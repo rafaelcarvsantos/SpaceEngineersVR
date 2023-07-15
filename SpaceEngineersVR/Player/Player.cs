@@ -38,6 +38,7 @@ namespace SpaceEngineersVR.Player
 		private static readonly FastResourceLock PlayerCalibrationLock = new FastResourceLock();
 		private static BodyCalibration PlayerCalibration;
 		public static event Action<BodyCalibration> OnPlayerCalibrationChanged;
+		public static event Action OnPlayerFloorChanged;
 
 		private static int CalibratingTicksLeft = 0;
 		private static BodyCalibration CalibrationInProgress;
@@ -307,6 +308,8 @@ namespace SpaceEngineersVR.Player
 			{
 				SyncPlayerToAbsolute = PlayerToAbsolute;
 			}
+
+			OnPlayerFloorChanged();
 		}
 	}
 }

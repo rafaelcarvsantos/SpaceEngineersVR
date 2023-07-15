@@ -1,8 +1,9 @@
-﻿using Sandbox.Game.Gui;
-using Sandbox.Graphics.GUI;
+﻿using Sandbox.Graphics.GUI;
 using SharpDX.Direct3D11;
+using SpaceEngineersVR.Util;
 using SpaceEngineersVR.Wrappers;
 using Valve.VR;
+using VRageMath;
 
 namespace SpaceEngineersVR.GUI
 {
@@ -10,25 +11,30 @@ namespace SpaceEngineersVR.GUI
 	{
 		public static bool IsDebugHUDEnabled = true;
 
-		private static readonly ulong overlayHandle = 0uL;
+		private static readonly ulong OverlayHandle = 0uL;
 
 		static VRGUIManager()
 		{
-			OpenVR.Overlay.CreateOverlay("SEVR_DEBUG_OVERLAY", "SEVR_DEBUG_OVERLAY", ref overlayHandle);
-			OpenVR.Overlay.SetOverlayWidthInMeters(overlayHandle, 3);
+			OpenVR.Overlay.CreateOverlay("SEVR_DEBUG_OVERLAY", "SEVR_DEBUG_OVERLAY", ref OverlayHandle);
+			OpenVR.Overlay.SetOverlayWidthInMeters(OverlayHandle, 0.5f);
 
-			HmdMatrix34_t transform = new HmdMatrix34_t
-			{
-				m0 = 1f, m1 = 0f, m2 = 0f, m3 = 0f,
-				m4 = 0f, m5 = 1f, m6 = 0f, m7 = 1f,
-				m8 = 0f, m9 = 0f, m10 = 1f, m11 = -2f
-			};
-			OpenVR.Overlay.SetOverlayTransformAbsolute(overlayHandle, ETrackingUniverseOrigin.TrackingUniverseStanding, ref transform);
-
-			OpenVR.Overlay.SetOverlayCurvature(overlayHandle, 0.25f);
-			OpenVR.Overlay.ShowOverlay(overlayHandle);
+			OpenVR.Overlay.SetOverlayCurvature(OverlayHandle, 0.35f);
+			OpenVR.Overlay.ShowOverlay(OverlayHandle);
 
 			MyGuiSandbox.AddScreen(new MouseOverlay());
+
+			Player.Player.OnPlayerFloorChanged += Player_OnPlayerFloorChanged;
+		}
+
+		private static void Player_OnPlayerFloorChanged()
+		{
+			Matrix mat = Player.Player.NeutralHeadToAbsolute.matrix;
+			mat.Forward = Vector3.Forward;
+			mat.Up = Vector3.Up;
+			mat.Right = Vector3.Right;
+			mat.Translation += mat.Forward * 0.25f;
+			HmdMatrix34_t transform = mat.ToHMDMatrix34();
+			OpenVR.Overlay.SetOverlayTransformAbsolute(OverlayHandle, ETrackingUniverseOrigin.TrackingUniverseStanding, ref transform);
 		}
 
 		public static void Draw()
@@ -41,8 +47,8 @@ namespace SpaceEngineersVR.GUI
 				handle = guiTexture.NativePointer
 			};
 
-			OpenVR.Overlay.SetOverlayTexture(overlayHandle, ref textureUI);
-			OpenVR.Overlay.ShowOverlay(overlayHandle);
+			OpenVR.Overlay.SetOverlayTexture(OverlayHandle, ref textureUI);
+			OpenVR.Overlay.ShowOverlay(OverlayHandle);
 		}
 	}
 }

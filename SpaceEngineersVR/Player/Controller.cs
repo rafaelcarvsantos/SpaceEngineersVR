@@ -61,38 +61,6 @@ namespace SpaceEngineersVR.Player
 			rollingVelocity[rollingVelocityUpdate++ % RollingVelocityFrames] = pose.velocity;
 		}
 
-		protected override void OnConnected()
-		{
-			if (MySession.Static == null)
-				return;
-
-			if (MySession.Static.IsPausable())
-			{
-				MySandboxGame.PausePop();
-				Logger.Info("Controller reconnected, unpausing game.");
-			}
-			else
-			{
-				Logger.Info("Controller reconnected, unable to unpause game as game is already unpaused.");
-			}
-		}
-		protected override void OnDisconnected()
-		{
-			if (MySession.Static == null)
-				return;
-
-			//CreatePopup("Error: One of your controllers got disconnected, please reconnect it to continue gameplay.");
-			if (MySession.Static.IsPausable())
-			{
-				MySandboxGame.PausePush();
-				Logger.Info("Controller disconnected, pausing game.");
-			}
-			else
-			{
-				Logger.Info("Controller disconnected, unable to pause game since it is a multiplayer session.");
-			}
-		}
-
 		public void TriggerHapticPulse(ushort duration = 500, Button button = Button.Touchpad)
 		{
 			OpenVR.System.TriggerHapticPulse(deviceId, (uint)button, (char)duration);

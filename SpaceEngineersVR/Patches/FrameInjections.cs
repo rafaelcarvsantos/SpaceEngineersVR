@@ -23,9 +23,7 @@ namespace SpaceEngineersVR.Patches
 
 			Common.Harmony.Patch(AccessTools.Method(t, "Present"), prefix: new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_Present)));
 
-			Common.Harmony.Patch(AccessTools.Method(t, "DrawScene"),
-				prefix: new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_DrawScene)),
-				postfix: new HarmonyMethod(typeof(FrameInjections), nameof(Postfix_DrawScene)));
+			Common.Harmony.Patch(AccessTools.Method(t, "DrawScene"), prefix: new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_DrawScene)));
 
 			Common.Harmony.Patch(AccessTools.Method(t, "RenderMainSprites", new Type[0]),
 				prefix: new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_RenderMainSprites)),
@@ -41,19 +39,10 @@ namespace SpaceEngineersVR.Patches
 
 		private static bool Prefix_DrawScene()
 		{
-			//RawColor4 rawColor = new RawColor4(0, 0, 0, 0);
-			//MyRender11.RC.ClearRtv(MyRender11.Backbuffer, rawColor);
 			Player.Player.RenderUpdate();
 			VRGUIManager.Draw();
 
 			return true;
-		}
-
-		private static void Postfix_DrawScene()
-		{
-			//RawColor4 rawColor = new RawColor4(0, 0, 0, 0);
-			//MyRender11.RC.ClearRtv(MyRender11.Backbuffer, rawColor);
-
 		}
 
 		private static bool Prefix_RenderMainSprites()
@@ -73,18 +62,6 @@ namespace SpaceEngineersVR.Patches
 					MyRender11.RenderMainSpritesWorker(MyRender11.Backbuffer.instance, MyRender11.ScaleMainViewport(myViewport), myViewport, size, defaultMessages, debugMessages, null);
 
 				}, Parallel.DefaultOptions.WithDebugInfo(MyProfiler.TaskType.GUI, "RenderMainSprites"), WorkPriority.VeryHigh);
-
-				//TODO: Fix this call that is causing a exception
-				//MyRender11.ConsumeMainSprites();
-
-				VRGUIManager.Draw();
-
-				/*
-				MyRender11.m_MainSpritesTask = Parallel.Start(delegate {
-					MyRender11.RenderMainSpritesWorker(MyRender11.Backbuffer, MyRender11.ScaleMainViewport(myViewport), myViewport, size, defaultMessages, debugMessages, null);
-
-				}, Parallel.DefaultOptions.WithDebugInfo(MyProfiler.TaskType.GUI, "RenderMainSprites"), WorkPriority.VeryHigh);
-				*/
 			}
 
 			return false;
@@ -93,6 +70,8 @@ namespace SpaceEngineersVR.Patches
 		private static void Postfix_RenderMainSprites()
 		{
 			MyRender11.ConsumeMainSprites();
+
+			VRGUIManager.Draw();
 		}
 	}
 }

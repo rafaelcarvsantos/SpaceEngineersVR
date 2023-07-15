@@ -1,4 +1,5 @@
 ﻿using SpaceEngineersVR.Util;
+using System;
 using Valve.VR;
 using VRageMath;
 
@@ -35,6 +36,11 @@ namespace SpaceEngineersVR.Player
 
 		private readonly ulong hapticsActionHandle;
 		private readonly ulong actionHandle;
+
+		public static event Action<TrackedDevice> OnDeviceConnected;
+		public static event Action<TrackedDevice> OnDeviceDisconnected;
+		public static event Action<TrackedDevice> OnDeviceStartTracking;
+		public static event Action<TrackedDevice> OnDeviceLostTracking;
 
 		public TrackedDevice(string actionName = null, string hapticsName = "/actions/feedback/out/GenericHaptic")
 		{
@@ -114,16 +120,20 @@ namespace SpaceEngineersVR.Player
 
 		protected virtual void OnConnected()
 		{
+			OnDeviceConnected.InvokeIfNotNull(this);
 		}
 		protected virtual void OnDisconnected()
 		{
+			OnDeviceDisconnected.InvokeIfNotNull(this);
 		}
 
 		protected virtual void OnStartTracking()
 		{
+			OnDeviceStartTracking.InvokeIfNotNull(this);
 		}
 		protected virtual void OnLostTracking()
 		{
+			OnDeviceLostTracking.InvokeIfNotNull(this);
 		}
 	}
 }

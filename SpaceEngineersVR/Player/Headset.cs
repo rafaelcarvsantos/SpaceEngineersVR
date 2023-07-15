@@ -231,6 +231,8 @@ namespace SpaceEngineersVR.Player
 
 		protected override void OnConnected()
 		{
+			base.OnConnected();
+
 			if (MySession.Static == null)
 				return;
 
@@ -246,6 +248,8 @@ namespace SpaceEngineersVR.Player
 		}
 		protected override void OnDisconnected()
 		{
+			base.OnDisconnected();
+
 			if (MySession.Static == null)
 				return;
 
@@ -263,6 +267,7 @@ namespace SpaceEngineersVR.Player
 
 		protected override void OnStartTracking()
 		{
+			base.OnStartTracking();
 			Player.ResetPlayerFloor();
 		}
 
