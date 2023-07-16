@@ -17,9 +17,12 @@ namespace SpaceEngineersVR.Util
 	{
 		private static MyStringId SQUARE = MyStringId.GetOrCompute("Square");
 
-		public static string GetAssetFolder()
+		public static string GetDefaultAssetFolder()
 		{
-			return Path.Combine(GetPluginsFolder(), "SEVRAssets");
+			string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+			if (string.IsNullOrEmpty(assemblyLocation))
+				return null;
+			return Path.Combine(Path.GetDirectoryName(assemblyLocation), "SEVRAssets");
 		}
 
 		public static string GetPluginsFolder()

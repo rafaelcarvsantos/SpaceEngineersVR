@@ -70,6 +70,11 @@ namespace SpaceEngineersVR.Plugin
 			}
 		}
 
+		public void LoadAssets(string folder)
+		{
+			Common.SetAssetPath(folder);
+		}
+
 		public void Update()
 		{
 			if (!failed)
