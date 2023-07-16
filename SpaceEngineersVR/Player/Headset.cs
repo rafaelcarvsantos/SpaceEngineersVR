@@ -91,7 +91,11 @@ namespace SpaceEngineersVR.Player
 
 			void SetCamera(VRage.Game.ModAPI.Interfaces.IMyCameraController camera)
 			{
-				if (camera?.Entity?.Components?.TryGet(out VRBodyComponent body) ?? false)
+				VRage.Game.Components.MyEntityComponentContainer components = camera?.Entity?.Components;
+				if (components == null)
+					return;
+
+				if (components.TryGet(out VRBodyComponent body))
 				{
 					SetBodyComponent(body);
 				}
