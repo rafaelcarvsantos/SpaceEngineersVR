@@ -1,4 +1,5 @@
 using SpaceEngineersVR.Player.Components;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -70,6 +71,11 @@ namespace SpaceEngineersVR.Config
 		private float handAimYawValue = MathHelper.ToRadians(HandAimYawData.initial);
 
 
+		public static readonly SliderData UIDepthData = new SliderData(0.1f, 10f, 0.5f);
+		private float uiDepthValue = UIDepthData.initial;
+		public event Action<float> onUIDepthChanged;
+
+
 		public bool enableKeyboardAndMouseControls
 		{
 			get => enableKeyboardAndMouseControlsValue;
@@ -131,6 +137,16 @@ namespace SpaceEngineersVR.Config
 		{
 			get => handAimYawValue;
 			set => SetValue(ref handAimYawValue, value);
+		}
+
+		public float uiDepth
+		{
+			get => uiDepthValue;
+			set
+			{
+				SetValue(ref uiDepthValue, value);
+				onUIDepthChanged.InvokeIfNotNull(value);
+			}
 		}
 	}
 }

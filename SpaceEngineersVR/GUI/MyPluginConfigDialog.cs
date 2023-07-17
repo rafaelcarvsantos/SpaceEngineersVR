@@ -45,6 +45,9 @@ namespace SpaceEngineersVR.GUI
 		private MyGuiControlLabel handAimYawLabel;
 		private MyGuiControlSlider handAimYawSlider;
 
+		private MyGuiControlLabel uiDepthLabel;
+		private MyGuiControlSlider uiDepthSlider;
+
 		private MyGuiControlMultilineText infoText;
 		private MyGuiControlButton closeButton;
 
@@ -187,11 +190,30 @@ namespace SpaceEngineersVR.GUI
 				MinValue = PluginConfig.HandAimYawData.min,
 				MaxValue = PluginConfig.HandAimYawData.max,
 				DefaultValue = PluginConfig.HandAimYawData.initial,
-				Value = MathHelper.ToDegrees(MathHelper.ToDegrees(config.handAimYaw)),
+				Value = MathHelper.ToDegrees(config.handAimYaw),
 				ValueChanged = (slider) =>
 				{
 					config.handAimYaw = MathHelper.ToRadians(slider.Value);
 					handAimYawLabel.Text = HandAimYawLabelStr();
+				},
+			};
+
+
+			string UIDepthLabelStr() => $"UI Depth ({config.uiDepth:0.00} meters)";
+			uiDepthLabel = new MyGuiControlLabel
+			{
+				Text = UIDepthLabelStr(),
+			};
+			uiDepthSlider = new MyGuiControlSlider
+			{
+				MinValue = PluginConfig.UIDepthData.min,
+				MaxValue = PluginConfig.UIDepthData.max,
+				DefaultValue = PluginConfig.UIDepthData.initial,
+				Value = config.uiDepth,
+				ValueChanged = (slider) =>
+				{
+					config.uiDepth = slider.Value;
+					uiDepthLabel.Text = UIDepthLabelStr();
 				},
 			};
 
@@ -233,7 +255,7 @@ namespace SpaceEngineersVR.GUI
 			var size = Size ?? Vector2.One;
 			layoutTable = new MyLayoutTable(this, -0.3f * size, 0.6f * size);
 			layoutTable.SetColumnWidths(400f, 600f);
-			layoutTable.SetRowHeights(50f, 50f, 50f, 50f, 50f, 50f, 50f, 50f, 50f, 80f, 80f);
+			layoutTable.SetRowHeights(50f, 50f, 50f, 50f, 50f, 50f, 50f, 50f, 50f, 50f, 80f, 80f);
 
 			var row = 0;
 
@@ -271,6 +293,10 @@ namespace SpaceEngineersVR.GUI
 
 			layoutTable.Add(handAimYawLabel, MyAlignH.Left, MyAlignV.Center, row, 0);
 			layoutTable.Add(handAimYawSlider, MyAlignH.Left, MyAlignV.Center, row, 1);
+			row++;
+
+			layoutTable.Add(uiDepthLabel, MyAlignH.Left, MyAlignV.Center, row, 0);
+			layoutTable.Add(uiDepthSlider, MyAlignH.Left, MyAlignV.Center, row, 1);
 			row++;
 
 			layoutTable.Add(infoText, MyAlignH.Center, MyAlignV.Bottom, row, 0, colSpan: 2);
