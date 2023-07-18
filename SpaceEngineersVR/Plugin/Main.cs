@@ -19,22 +19,21 @@ namespace SpaceEngineersVR.Plugin
 	// ReSharper disable once UnusedType.Global
 	public class Main : IPlugin
 	{
-		public Harmony Harmony { get; private set; }
-		public PluginConfig Config => config?.Data;
+		public static Harmony Harmony { get; private set; }
+		public static PluginConfig Config { get; private set; }
 
-		private PersistentConfig<PluginConfig> config;
 		private static readonly string ConfigFileName = $"{Common.Name}.cfg";
 
-		private static bool failed;
+		private static bool Failed;
 
-		private Vector2I DesktopResolution;
+		private static Vector2I DesktopResolution;
 
 		[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
 		public void Init(object gameInstance)
 		{
 			MyLog.Default.WriteLine("SpaceEngineersVR: starting...");
 			var configPath = Path.Combine(MyFileSystem.UserDataPath, ConfigFileName);
-			config = PersistentConfig<PluginConfig>.Load(configPath);
+			Config = PluginConfig.Load(configPath);
 
 			Common.SetPlugin(this);
 
@@ -42,7 +41,7 @@ namespace SpaceEngineersVR.Plugin
 			{
 				if (!Initialize())
 				{
-					failed = true;
+					Failed = true;
 				}
 			}
 			catch (Exception ex)
@@ -56,7 +55,7 @@ namespace SpaceEngineersVR.Plugin
 
 		public void Dispose()
 		{
-			if (!failed)
+			if (!Failed)
 			{
 				try
 				{
@@ -77,7 +76,7 @@ namespace SpaceEngineersVR.Plugin
 
 		public void Update()
 		{
-			if (!failed)
+			if (!Failed)
 			{
 				try
 				{
@@ -86,7 +85,7 @@ namespace SpaceEngineersVR.Plugin
 				catch (Exception ex)
 				{
 					Logger.Critical(ex, "Update failed");
-					failed = true;
+					Failed = true;
 				}
 			}
 		}

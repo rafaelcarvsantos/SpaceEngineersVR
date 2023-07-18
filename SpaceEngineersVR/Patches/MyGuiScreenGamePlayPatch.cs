@@ -14,7 +14,7 @@ namespace SpaceEngineersVR.Patches
 			if (VRMovementComponent.UsingControllerMovement)
 				return false;
 
-			return Plugin.Common.Config.enableKeyboardAndMouseControls;
+			return Plugin.Main.Config.enableKeyboardAndMouseControls.value;
 		}
 	}
 }

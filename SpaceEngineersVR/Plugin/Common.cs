@@ -27,7 +27,7 @@ namespace SpaceEngineersVR.Plugin
 		public static void SetPlugin(Main plugin)
 		{
 			Plugin = plugin;
-			Config = plugin.Config;
+			Config = Main.Config;
 
 			if (AssetFolder == null)
 				SetAssetPath(Util.Util.GetDefaultAssetFolder());

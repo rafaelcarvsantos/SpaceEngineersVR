@@ -3,6 +3,7 @@ using Sandbox.Graphics.GUI;
 using SpaceEngineersVR.Config;
 using SpaceEngineersVR.Player.Components;
 using SpaceEngineersVR.Plugin;
+using SpaceEngineersVR.Utils;
 using System;
 using System.Text;
 using VRage;
@@ -80,9 +81,9 @@ namespace SpaceEngineersVR.GUI
 			AddCaption(Caption);
 
 			var config = Common.Config;
-			CreateCheckbox(out enableKeyboardAndMouseControlsLabel, out enableKeyboardAndMouseControlsCheckbox, config.enableKeyboardAndMouseControls, value => config.enableKeyboardAndMouseControls = value, "Enable Keyboard And Mouse Controls", "Enables keyboard and mouse controls.");
-			CreateCheckbox(out enableCharacterRenderingLabel, out enableCharacterRenderingCheckbox, config.enableCharacterRendering, value => config.enableCharacterRendering = value, "Enable Character Rendering", "Enables rendering the character.");
-			CreateCheckbox(out useHeadRotationForCharacterLabel, out useHeadRotationForCharacterCheckbox, config.useHeadRotationForCharacter, value => config.useHeadRotationForCharacter = value, "Use Head Rotation For Character", "Character turns when you turn your head, otherwise they always face your SteamVR forward direction.");
+			CreateCheckbox(out enableKeyboardAndMouseControlsLabel, out enableKeyboardAndMouseControlsCheckbox, config.enableKeyboardAndMouseControls.value, value => config.enableKeyboardAndMouseControls.value = value, "Enable Keyboard And Mouse Controls", "Enables keyboard and mouse controls.");
+			CreateCheckbox(out enableCharacterRenderingLabel, out enableCharacterRenderingCheckbox, config.enableCharacterRendering.value, value => config.enableCharacterRendering.value = value, "Enable Character Rendering", "Enables rendering the character.");
+			CreateCheckbox(out useHeadRotationForCharacterLabel, out useHeadRotationForCharacterCheckbox, config.useHeadRotationForCharacter.value, value => config.useHeadRotationForCharacter.value = value, "Use Head Rotation For Character", "Character turns when you turn your head, otherwise they always face your SteamVR forward direction.");
 
 			characterScalingModeLabel = new MyGuiControlLabel()
 			{
@@ -102,7 +103,7 @@ namespace SpaceEngineersVR.GUI
 			characterScalingModeListBox.ItemClicked += listBox =>
 			{
 				listBox.SelectSingleItem(listBox.FocusedItem);
-				config.bodyScalingModeIndex = (int)listBox.FocusedItem.UserData;
+				config.bodyScalingModeIndex.value = (int)listBox.FocusedItem.UserData;
 			};
 
 
@@ -113,87 +114,87 @@ namespace SpaceEngineersVR.GUI
 			};
 			resolutionScaleSlider = new MyGuiControlSlider
 			{
-				MinValue = PluginConfig.ResolutionScaleData.min,
-				MaxValue = PluginConfig.ResolutionScaleData.max,
-				DefaultValue = PluginConfig.ResolutionScaleData.initial,
-				Value = config.resolutionScale,
+				MinValue = config.resolutionScale.min,
+				MaxValue = config.resolutionScale.max,
+				DefaultValue = config.resolutionScale.defaultValue,
+				Value = config.resolutionScale.value,
 				ValueChanged = (slider) =>
 				{
-					config.resolutionScale = slider.Value;
+					config.resolutionScale.value = slider.Value;
 					resolutionScaleLabel.Text = ResolutionLabelStr();
 				},
 			};
 
 
-			string HandActivationPitchLabelStr() => $"Hand Activation Pitch ({MathHelper.ToDegrees(config.handActivationPitch):0} degrees)";
+			string HandActivationPitchLabelStr() => $"Hand Activation Pitch ({config.handActivationPitch:0} degrees)";
 			handActivationPitchLabel = new MyGuiControlLabel
 			{
 				Text = HandActivationPitchLabelStr(),
 			};
 			handActivationPitchSlider = new MyGuiControlSlider
 			{
-				MinValue = PluginConfig.HandActivationPitchData.min,
-				MaxValue = PluginConfig.HandActivationPitchData.max,
-				DefaultValue = PluginConfig.HandActivationPitchData.initial,
-				Value = MathHelper.ToDegrees(config.handActivationPitch),
+				MinValue = config.handActivationPitch.min.degrees,
+				MaxValue = config.handActivationPitch.max.degrees,
+				DefaultValue = config.handActivationPitch.defaultValue.degrees,
+				Value = config.handActivationPitch.value.degrees,
 				ValueChanged = (slider) =>
 				{
-					config.handActivationPitch = MathHelper.ToRadians(slider.Value);
+					config.handActivationPitch.value = AngleF.Degrees(slider.Value);
 					handActivationPitchLabel.Text = HandActivationPitchLabelStr();
 				},
 			};
 
-			string HandActivationYawLabelStr() => $"Hand Activation Yaw ({MathHelper.ToDegrees(config.handActivationYaw):0} degrees)";
+			string HandActivationYawLabelStr() => $"Hand Activation Yaw ({config.handActivationYaw.value.degrees:0} degrees)";
 			handActivationYawLabel = new MyGuiControlLabel
 			{
 				Text = HandActivationYawLabelStr(),
 			};
 			handActivationYawSlider = new MyGuiControlSlider
 			{
-				MinValue = PluginConfig.HandActivationYawData.min,
-				MaxValue = PluginConfig.HandActivationYawData.max,
-				DefaultValue = PluginConfig.HandActivationYawData.initial,
-				Value = MathHelper.ToDegrees(MathHelper.ToDegrees(config.handActivationYaw)),
+				MinValue = config.handActivationYaw.min.degrees,
+				MaxValue = config.handActivationYaw.max.degrees,
+				DefaultValue = config.handActivationYaw.defaultValue.degrees,
+				Value = config.handActivationYaw.value.degrees,
 				ValueChanged = (slider) =>
 				{
-					config.handActivationYaw = MathHelper.ToRadians(slider.Value);
+					config.handActivationYaw.value = AngleF.Degrees(slider.Value);
 					handActivationYawLabel.Text = HandActivationYawLabelStr();
 				},
 			};
 
 
-			string HandAimPitchLabelStr() => $"Hand Aim Pitch ({MathHelper.ToDegrees(config.handAimPitch):0} degrees)";
+			string HandAimPitchLabelStr() => $"Hand Aim Pitch ({config.handAimPitch:0} degrees)";
 			handAimPitchLabel = new MyGuiControlLabel
 			{
 				Text = HandAimPitchLabelStr(),
 			};
 			handAimPitchSlider = new MyGuiControlSlider
 			{
-				MinValue = PluginConfig.HandAimPitchData.min,
-				MaxValue = PluginConfig.HandAimPitchData.max,
-				DefaultValue = PluginConfig.HandAimPitchData.initial,
-				Value = MathHelper.ToDegrees(config.handAimPitch),
+				MinValue = config.handAimPitch.min.degrees,
+				MaxValue = config.handAimPitch.max.degrees,
+				DefaultValue = config.handAimPitch.defaultValue.degrees,
+				Value = config.handAimPitch.value.degrees,
 				ValueChanged = (slider) =>
 				{
-					config.handAimPitch = MathHelper.ToRadians(slider.Value);
+					config.handAimPitch.value = AngleF.Degrees(slider.Value);
 					handAimPitchLabel.Text = HandAimPitchLabelStr();
 				},
 			};
 
-			string HandAimYawLabelStr() => $"Hand Aim Yaw ({MathHelper.ToDegrees(config.handAimYaw):0} degrees)";
+			string HandAimYawLabelStr() => $"Hand Aim Yaw ({config.handAimYaw.value.degrees:0} degrees)";
 			handAimYawLabel = new MyGuiControlLabel
 			{
 				Text = HandAimYawLabelStr(),
 			};
 			handAimYawSlider = new MyGuiControlSlider
 			{
-				MinValue = PluginConfig.HandAimYawData.min,
-				MaxValue = PluginConfig.HandAimYawData.max,
-				DefaultValue = PluginConfig.HandAimYawData.initial,
-				Value = MathHelper.ToDegrees(config.handAimYaw),
+				MinValue = config.handAimYaw.min.degrees,
+				MaxValue = config.handAimYaw.max.degrees,
+				DefaultValue = config.handAimYaw.defaultValue.degrees,
+				Value = config.handAimYaw.value.degrees,
 				ValueChanged = (slider) =>
 				{
-					config.handAimYaw = MathHelper.ToRadians(slider.Value);
+					config.handAimYaw.value = AngleF.Degrees(slider.Value);
 					handAimYawLabel.Text = HandAimYawLabelStr();
 				},
 			};
@@ -206,13 +207,13 @@ namespace SpaceEngineersVR.GUI
 			};
 			uiDepthSlider = new MyGuiControlSlider
 			{
-				MinValue = PluginConfig.UIDepthData.min,
-				MaxValue = PluginConfig.UIDepthData.max,
-				DefaultValue = PluginConfig.UIDepthData.initial,
-				Value = config.uiDepth,
+				MinValue = config.uiDepth.min,
+				MaxValue = config.uiDepth.max,
+				DefaultValue = config.uiDepth.defaultValue,
+				Value = config.uiDepth.value,
 				ValueChanged = (slider) =>
 				{
-					config.uiDepth = slider.Value;
+					config.uiDepth.value = slider.Value;
 					uiDepthLabel.Text = UIDepthLabelStr();
 				},
 			};

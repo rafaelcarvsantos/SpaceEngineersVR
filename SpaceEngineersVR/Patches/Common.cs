@@ -11,7 +11,7 @@ namespace SpaceEngineersVR.Patches
 {
 	public static class Common
 	{
-		public static Harmony Harmony => Plugin.Common.Plugin.Harmony;
+		public static Harmony Harmony => Plugin.Main.Harmony;
 
 		public static readonly HarmonyMethod Prefix_DoNotRun_Harmony = new HarmonyMethod(typeof(Common), nameof(Prefix_DoNotRun_Method));
 		public static readonly MethodInfo Prefix_DoNotRun_Info = typeof(Common).GetMethod(nameof(Prefix_DoNotRun_Method));

@@ -36,7 +36,8 @@ namespace SpaceEngineersVR.GUI
 			MyGuiSandbox.AddScreen(new MouseOverlay());
 
 			Player.Player.OnPlayerFloorChanged += RepositionOverlay;
-			Common.Config.onUIDepthChanged += _ => RepositionOverlay();
+			Common.Config.uiDepth.onValueChanged += _ => RepositionOverlay();
+			Common.Config.resolutionScale.onValueChanged += _ => RepositionOverlay();
 		}
 
 		private static void RepositionOverlay()
@@ -45,11 +46,11 @@ namespace SpaceEngineersVR.GUI
 			mat.Forward = Vector3.Forward;
 			mat.Up = Vector3.Up;
 			mat.Right = Vector3.Right;
-			mat.Translation += mat.Forward * Common.Config.uiDepth;
+			mat.Translation += mat.Forward * Common.Config.uiDepth.value;
 			HmdMatrix34_t transform = mat.ToHMDMatrix34();
 			OpenVR.Overlay.SetOverlayTransformAbsolute(OverlayHandle, ETrackingUniverseOrigin.TrackingUniverseStanding, ref transform);
 
-			OpenVR.Overlay.SetOverlayWidthInMeters(OverlayHandle, 2f * Common.Config.uiDepth);
+			OpenVR.Overlay.SetOverlayWidthInMeters(OverlayHandle, Common.Config.resolutionScale.value * Common.Config.uiDepth.value);
 
 			OpenVR.Overlay.SetOverlayCurvature(OverlayHandle, 0.35f);
 		}

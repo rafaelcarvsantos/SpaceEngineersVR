@@ -33,7 +33,7 @@ namespace SpaceEngineersVR.Player
 		private readonly uint width;
 
 		public Vector2I rawResolution => new Vector2I((int)width, (int)height);
-		public Vector2I scaledResolution => new Vector2I((int)(width * Common.Config.resolutionScale), (int)(height * Common.Config.resolutionScale));
+		public Vector2I scaledResolution => new Vector2I((int)(width * Common.Config.resolutionScale.value), (int)(height * Common.Config.resolutionScale.value));
 
 		private readonly float fovH;
 		private readonly float fovV;
@@ -282,11 +282,11 @@ namespace SpaceEngineersVR.Player
 			var character = MyAPIGateway.Session?.Player?.Character;
 			if (character != null)
 			{
-				if (character.Visible && !Common.Config.enableCharacterRendering)
+				if (character.Visible && !Common.Config.enableCharacterRendering.value)
 				{
 					character.Visible = false;
 				}
-				else if (!character.Visible && Common.Config.enableCharacterRendering)
+				else if (!character.Visible && Common.Config.enableCharacterRendering.value)
 				{
 					character.Visible = true;
 				}

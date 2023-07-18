@@ -57,10 +57,10 @@ namespace SpaceEngineersVR.Player.Components
 			ArmSpanScaling,
 		};
 
-		public static readonly int DefaultScalingMode = 1;
+		public static readonly int DefaultScalingMode = 0;
 
 		private static readonly Handed<Matrix> HandExtraTransforms = new Handed<Matrix>(
-													Matrix.CreateRotationZ(MathHelper.Pi / 2) * Matrix.CreateRotationX(MathHelper.Pi / 2),
+			                                        Matrix.CreateRotationZ( MathHelper.Pi / 2) * Matrix.CreateRotationX(MathHelper.Pi / 2),
 			Matrix.CreateRotationY(MathHelper.Pi) * Matrix.CreateRotationZ(-MathHelper.Pi / 2) * Matrix.CreateRotationX(MathHelper.Pi / 2));
 
 		private static readonly Handed<FieldInfo> HandIndexFields = new Handed<FieldInfo>(
@@ -184,7 +184,7 @@ namespace SpaceEngineersVR.Player.Components
 
 		private void RecalculatePlayerScale(BodyCalibration playerCalibration)
 		{
-			playerToCharacter = new MatrixAndInvert(ScalingModes[Common.Config.bodyScalingModeIndex].method(playerCalibration, characterCalibration));
+			playerToCharacter = new MatrixAndInvert(ScalingModes[Common.Config.bodyScalingModeIndex.value].method(playerCalibration, characterCalibration));
 		}
 
 		public override void OnCharacterDead()
@@ -197,9 +197,9 @@ namespace SpaceEngineersVR.Player.Components
 
 			Matrix aimOffset;
 			if (Character.CurrentWeapon != null) //TODO: Custom offsets for each weapon/tool, preferably with an easy in game way to adjust it for modded weapons/tools
-				aimOffset = Matrix.CreateRotationX(Common.Config.handAimPitch) * Matrix.CreateRotationZ(Common.Config.handAimYaw);
+				aimOffset = Matrix.CreateRotationX(Common.Config.handAimPitch.value.radians) * Matrix.CreateRotationZ(Common.Config.handAimYaw.value.radians);
 			else
-				aimOffset = Matrix.CreateRotationX(Common.Config.handActivationPitch) * Matrix.CreateRotationZ(Common.Config.handActivationYaw);
+				aimOffset = Matrix.CreateRotationX(Common.Config.handActivationPitch.value.radians) * Matrix.CreateRotationZ(Common.Config.handActivationYaw.value.radians);
 
 			hands = new Handed<Hand?>(
 				UpdateHand(Player.Hands.left),

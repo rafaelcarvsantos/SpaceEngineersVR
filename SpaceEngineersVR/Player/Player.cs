@@ -72,8 +72,8 @@ namespace SpaceEngineersVR.Player
 
 			using (PlayerCalibrationLock.AcquireExclusiveUsing())
 			{
-				PlayerCalibration.height = Common.Config.playerHeight;
-				PlayerCalibration.armSpan = Common.Config.playerArmSpan;
+				PlayerCalibration.height = Common.Config.playerHeight.value;
+				PlayerCalibration.armSpan = Common.Config.playerArmSpan.value;
 			}
 		}
 
@@ -267,9 +267,9 @@ namespace SpaceEngineersVR.Player
 		public static void FinishCalibration()
 		{
 			if (CalibrationInProgress.height > 0f)
-				Common.Config.playerHeight = CalibrationInProgress.height;
+				Common.Config.playerHeight.value = CalibrationInProgress.height;
 			if (CalibrationInProgress.armSpan > 0f)
-				Common.Config.playerArmSpan = CalibrationInProgress.armSpan;
+				Common.Config.playerArmSpan.value = CalibrationInProgress.armSpan;
 
 			using (PlayerCalibrationLock.AcquireExclusiveUsing())
 			{
@@ -293,7 +293,7 @@ namespace SpaceEngineersVR.Player
 		public static void ResetPlayerFloor()
 		{
 			Matrix floor;
-			if (Common.Config.useHeadRotationForCharacter)
+			if (Common.Config.useHeadRotationForCharacter.value)
 				floor = Util.Util.ZeroPitchAndRoll(Headset.pose.deviceToAbsolute.matrix);
 			else
 				floor = Matrix.CreateTranslation(Headset.pose.deviceToAbsolute.matrix.Translation);
