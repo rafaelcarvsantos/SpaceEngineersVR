@@ -17,19 +17,6 @@ namespace SpaceEngineersVR.Util
 	{
 		private static MyStringId SQUARE = MyStringId.GetOrCompute("Square");
 
-		public static string GetDefaultAssetFolder()
-		{
-			string assemblyLocation = Assembly.GetExecutingAssembly().Location;
-			if (string.IsNullOrEmpty(assemblyLocation))
-				return null;
-			return Path.Combine(Path.GetDirectoryName(assemblyLocation), "SEVRAssets");
-		}
-
-		public static string GetPluginsFolder()
-		{
-			return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-		}
-
 		public static void DrawDebugLine(Vector3D posA, Vector3D posB, Color color)
 		{
 			Vector4 colorVec = color;

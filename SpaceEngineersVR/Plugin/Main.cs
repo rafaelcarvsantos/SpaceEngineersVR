@@ -22,7 +22,11 @@ namespace SpaceEngineersVR.Plugin
 		public static Harmony Harmony { get; private set; }
 		public static PluginConfig Config { get; private set; }
 
-		private static readonly string ConfigFileName = $"{Common.Name}.cfg";
+		public static readonly string Name = "SpaceEngineersVR";
+		public static readonly string PublicName = "Space Engineers VR";
+		public static readonly string ShortName = "SEVR";
+
+		public static readonly Version Version = typeof(Main).Assembly.GetName().Version;
 
 		private static bool Failed;
 
@@ -32,10 +36,8 @@ namespace SpaceEngineersVR.Plugin
 		public void Init(object gameInstance)
 		{
 			MyLog.Default.WriteLine("SpaceEngineersVR: starting...");
-			var configPath = Path.Combine(MyFileSystem.UserDataPath, ConfigFileName);
+			string configPath = Path.Combine(MyFileSystem.UserDataPath, ConfigFileName);
 			Config = PluginConfig.Load(configPath);
-
-			Common.SetPlugin(this);
 
 			try
 			{

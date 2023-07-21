@@ -1,4 +1,3 @@
-using SpaceEngineersVR.Config;
 using System;
 using System.Drawing;
 using System.IO;
@@ -7,9 +6,6 @@ namespace SpaceEngineersVR.Plugin
 {
 	public static class Common
 	{
-		public static Main Plugin { get; private set; }
-		public static PluginConfig Config { get; private set; }
-
 		public static string AssetFolder { get; private set; }
 
 		public static Icon Icon { get; private set; }
@@ -17,20 +13,11 @@ namespace SpaceEngineersVR.Plugin
 		public static string IconIcoPath { get; private set; }
 		public static string ActionJsonPath { get; private set; }
 
+		private static readonly string ConfigFileName = $"{Main.Name}.cfg";
 
-		public static readonly string Name = "SpaceEngineersVR";
-		public static readonly string PublicName = "Space Engineers VR";
-		public static readonly string ShortName = "SEVR";
-
-		public static readonly Version Version = typeof(Main).Assembly.GetName().Version;
-
-		public static void SetPlugin(Main plugin)
+		static Common()
 		{
-			Plugin = plugin;
-			Config = Main.Config;
-
-			if (AssetFolder == null)
-				SetAssetPath(Util.Util.GetDefaultAssetFolder());
+			SetAssetPath(GetDefaultAssetFolder());
 		}
 
 		public static void SetAssetPath(string folder)
@@ -44,6 +31,19 @@ namespace SpaceEngineersVR.Plugin
 			IconPngPath = Path.Combine(folder, "logo.png");
 			IconIcoPath = Path.Combine(folder, "logo.ico");
 			ActionJsonPath = Path.Combine(folder, "Controls", "actions.json");
+		}
+
+		public static string GetDefaultAssetFolder()
+		{
+			string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+			if (string.IsNullOrEmpty(assemblyLocation))
+				return null;
+			return Path.Combine(Path.GetDirectoryName(assemblyLocation), "SEVRAssets");
+		}
+
+		public static string GetPluginsFolder()
+		{
+			return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 		}
 	}
 }
