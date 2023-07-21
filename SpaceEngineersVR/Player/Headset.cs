@@ -4,6 +4,7 @@ using Sandbox.Game.World;
 using Sandbox.ModAPI;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
+using SpaceEngineersVR.Config;
 using SpaceEngineersVR.Player.Components;
 using SpaceEngineersVR.Plugin;
 using SpaceEngineersVR.Util;
@@ -33,7 +34,7 @@ namespace SpaceEngineersVR.Player
 		private readonly uint width;
 
 		public Vector2I rawResolution => new Vector2I((int)width, (int)height);
-		public Vector2I scaledResolution => new Vector2I((int)(width * Common.Config.resolutionScale.value), (int)(height * Common.Config.resolutionScale.value));
+		public Vector2I scaledResolution => new Vector2I((int)(width * Main.Config.resolutionScale.value), (int)(height * Main.Config.resolutionScale.value));
 
 		private readonly float fovH;
 		private readonly float fovV;
@@ -107,16 +108,12 @@ namespace SpaceEngineersVR.Player
 		private bool firstUpdate = true;
 		private BorrowedRtvTexture texture;
 
-		public void RenderUpdate()
+		public void DrawScene()
 		{
-			if (!MyRender11.m_DrawScene)
-			{
-				firstUpdate = true;
-				return;
-			}
-
 			if (firstUpdate && renderPose.isTracked)
 			{
+				//TODO: Listen to Main.Config.resolutionScale.onValueChanged and update rendering stuff
+
 				MyRender11.Resolution = new Vector2I(scaledResolution.X, scaledResolution.Y);
 				MyRender11.CreateScreenResources();
 				firstUpdate = false;
@@ -282,11 +279,11 @@ namespace SpaceEngineersVR.Player
 			var character = MyAPIGateway.Session?.Player?.Character;
 			if (character != null)
 			{
-				if (character.Visible && !Common.Config.enableCharacterRendering.value)
+				if (character.Visible && !Main.Config.enableCharacterRendering.value)
 				{
 					character.Visible = false;
 				}
-				else if (!character.Visible && Common.Config.enableCharacterRendering.value)
+				else if (!character.Visible && Main.Config.enableCharacterRendering.value)
 				{
 					character.Visible = true;
 				}
@@ -353,7 +350,7 @@ namespace SpaceEngineersVR.Player
 			Parallel.Start(() =>
 			{
 				Logger.Info($"Messagebox created with the message: {msg}");
-				DialogResult result = System.Windows.Forms.MessageBox.Show(msg, caption, MessageBoxButtons.OKCancel);
+				DialogResult result = MessageBox.Show(msg, caption, MessageBoxButtons.OKCancel);
 				return result;
 			});
 			return DialogResult.None;

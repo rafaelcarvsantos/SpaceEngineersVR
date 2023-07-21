@@ -184,7 +184,7 @@ namespace SpaceEngineersVR.Player.Components
 
 		private void RecalculatePlayerScale(BodyCalibration playerCalibration)
 		{
-			playerToCharacter = new MatrixAndInvert(ScalingModes[Common.Config.bodyScalingModeIndex.value].method(playerCalibration, characterCalibration));
+			playerToCharacter = new MatrixAndInvert(ScalingModes[Main.Config.bodyScalingModeIndex.value].method(playerCalibration, characterCalibration));
 		}
 
 		public override void OnCharacterDead()
@@ -197,9 +197,9 @@ namespace SpaceEngineersVR.Player.Components
 
 			Matrix aimOffset;
 			if (Character.CurrentWeapon != null) //TODO: Custom offsets for each weapon/tool, preferably with an easy in game way to adjust it for modded weapons/tools
-				aimOffset = Matrix.CreateRotationX(Common.Config.handAimPitch.value.radians) * Matrix.CreateRotationZ(Common.Config.handAimYaw.value.radians);
+				aimOffset = Matrix.CreateRotationX(Main.Config.handAimPitch.value.radians) * Matrix.CreateRotationZ(Main.Config.handAimYaw.value.radians);
 			else
-				aimOffset = Matrix.CreateRotationX(Common.Config.handActivationPitch.value.radians) * Matrix.CreateRotationZ(Common.Config.handActivationYaw.value.radians);
+				aimOffset = Matrix.CreateRotationX(Main.Config.handActivationPitch.value.radians) * Matrix.CreateRotationZ(Main.Config.handActivationYaw.value.radians);
 
 			hands = new Handed<Hand?>(
 				UpdateHand(Player.Hands.left),

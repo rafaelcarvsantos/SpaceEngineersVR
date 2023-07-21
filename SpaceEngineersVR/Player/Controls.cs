@@ -262,7 +262,7 @@ namespace SpaceEngineersVR.Player
 
 		static Controls()
 		{
-			OpenVR.Input.SetActionManifestPath(Common.ActionJsonPath);
+			OpenVR.Input.SetActionManifestPath(Assets.ActionJsonPath);
 		}
 
 		private static void UpdateCommon()

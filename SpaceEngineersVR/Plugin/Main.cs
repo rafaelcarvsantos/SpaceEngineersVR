@@ -36,7 +36,7 @@ namespace SpaceEngineersVR.Plugin
 		public void Init(object gameInstance)
 		{
 			MyLog.Default.WriteLine("SpaceEngineersVR: starting...");
-			string configPath = Path.Combine(MyFileSystem.UserDataPath, ConfigFileName);
+			string configPath = Path.Combine(MyFileSystem.UserDataPath, Assets.ConfigFileName);
 			Config = PluginConfig.Load(configPath);
 
 			try
@@ -73,7 +73,7 @@ namespace SpaceEngineersVR.Plugin
 
 		public void LoadAssets(string folder)
 		{
-			Common.SetAssetPath(folder);
+			Assets.SetFolder(folder);
 		}
 
 		public void Update()
@@ -127,7 +127,7 @@ namespace SpaceEngineersVR.Plugin
 			*/
 
 			Logger.Info("Patching game");
-			Harmony = new Harmony(Common.Name);
+			Harmony = new Harmony(Name);
 			Harmony.PatchAll(Assembly.GetExecutingAssembly());
 
 			Util.InitialiseOnStartAttribute.FindAndInitialise();

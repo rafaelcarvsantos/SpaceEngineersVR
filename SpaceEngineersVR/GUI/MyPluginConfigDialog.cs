@@ -114,30 +114,30 @@ namespace SpaceEngineersVR.GUI
 			};
 
 
-			CreateSlider(out resolutionScaleLabel, out resolutionScaleSlider, Plugin.Main.Config.resolutionScale,
+			CreateSlider(out resolutionScaleLabel, out resolutionScaleSlider, Main.Config.resolutionScale,
 				v => v, v => v,
 				v => $"Resolution Scale ({v:P0})",
 				"Changes the ingame resolution to be higher or lower than the headsets to increase image quality at the cost of performance, and vice versa.");
 
-			CreateSlider(out handActivationPitchLabel, out handActivationPitchSlider, Plugin.Main.Config.handActivationPitch,
+			CreateSlider(out handActivationPitchLabel, out handActivationPitchSlider, Main.Config.handActivationPitch,
 				v => v.radians, v => AngleF.Radian(v),
 				v => $"Hand Activation Pitch ({v.degrees:0} degrees)",
 				"Adjusts the pitch of the ray from the primary hand used to interact with things like button.");
-			CreateSlider(out handActivationYawLabel, out handActivationYawSlider, Plugin.Main.Config.handActivationYaw,
+			CreateSlider(out handActivationYawLabel, out handActivationYawSlider, Main.Config.handActivationYaw,
 				v => v.radians, v => AngleF.Radian(v),
 				v => $"Hand Activation Yaw ({v.degrees:0} degrees)",
 				"Adjusts the yaw of the ray from the primary hand used to interact with things like button.");
 
-			CreateSlider(out handAimPitchLabel, out handAimPitchSlider, Plugin.Main.Config.handAimPitch,
+			CreateSlider(out handAimPitchLabel, out handAimPitchSlider, Main.Config.handAimPitch,
 				v => v.radians, v => AngleF.Radian(v),
 				v => $"Hand Aim Pitch ({v.degrees:0} degrees)",
 				"Adjusts the pitch of tools and weapons when held.");
-			CreateSlider(out handAimYawLabel, out handAimYawSlider, Plugin.Main.Config.handAimYaw,
+			CreateSlider(out handAimYawLabel, out handAimYawSlider, Main.Config.handAimYaw,
 				v => v.radians, v => AngleF.Radian(v),
 				v => $"Hand Aim Yaw ({v.degrees:0} degrees)",
 				"Adjusts the yaw of tools and weapons when held.");
 
-			CreateSlider(out uiDepthLabel, out uiDepthSlider, Plugin.Main.Config.uiDepth,
+			CreateSlider(out uiDepthLabel, out uiDepthSlider, Main.Config.uiDepth,
 				v => v, v => v,
 				v => $"UI Depth ({config.uiDepth:0.00} meters)",
 				"Changes the distance the UI is from your head position.");

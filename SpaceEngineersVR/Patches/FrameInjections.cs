@@ -2,6 +2,7 @@
 using ParallelTasks;
 using SharpDX.Mathematics.Interop;
 using SpaceEngineersVR.GUI;
+using SpaceEngineersVR.Player;
 using SpaceEngineersVR.Player.Components;
 using SpaceEngineersVR.Plugin;
 using SpaceEngineersVR.Wrappers;
@@ -23,6 +24,8 @@ namespace SpaceEngineersVR.Patches
 
 			Common.Harmony.Patch(AccessTools.Method(t, "Present"), prefix: new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_Present)));
 
+			Common.Harmony.Patch(AccessTools.Method(t, "Draw"), prefix: new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_Draw)));
+
 			Common.Harmony.Patch(AccessTools.Method(t, "DrawScene"), prefix: new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_DrawScene)));
 
 			Common.Harmony.Patch(AccessTools.Method(t, "RenderMainSprites", new Type[0]),
@@ -37,10 +40,16 @@ namespace SpaceEngineersVR.Patches
 			return !DisablePresent;
 		}
 
-		private static bool Prefix_DrawScene()
+		private static bool Prefix_Draw()
 		{
 			Player.Player.RenderUpdate();
-			VRGUIManager.Draw();
+
+			return true;
+		}
+
+		private static bool Prefix_DrawScene()
+		{
+			Player.Player.Headset.DrawScene();
 
 			return true;
 		}

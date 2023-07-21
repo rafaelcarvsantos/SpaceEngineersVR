@@ -110,7 +110,7 @@ namespace SpaceEngineersVR.Config
 				{
 					internalValue = value;
 					ValueChanged(internalValue);
-					Assets.Config.SaveLater();
+					Main.Config.SaveLater();
 				}
 			}
 		}
@@ -141,7 +141,7 @@ namespace SpaceEngineersVR.Config
 
 					internalValue = value;
 					ValueChanged(internalValue);
-					Assets.Config.SaveLater();
+					Main.Config.SaveLater();
 				}
 			}
 		}

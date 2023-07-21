@@ -20,24 +20,11 @@ namespace SpaceEngineersVR.GUI
 			OpenVR.Overlay.CreateOverlay("SEVR_DEBUG_OVERLAY", "SEVR_DEBUG_OVERLAY", ref OverlayHandle);
 			OpenVR.Overlay.ShowOverlay(OverlayHandle);
 
-			//TODO: reset the overlay to these values when a game is exited
-			OpenVR.Overlay.SetOverlayWidthInMeters(OverlayHandle, 3f);
-
-			HmdMatrix34_t transform = new HmdMatrix34_t
-			{
-				m0 = 1f, m1 = 0f, m2 = 0f, m3 = 0f,
-				m4 = 0f, m5 = 1f, m6 = 0f, m7 = 1f,
-				m8 = 0f, m9 = 0f, m10 = 1f, m11 = -2f
-			};
-			OpenVR.Overlay.SetOverlayTransformAbsolute(OverlayHandle, ETrackingUniverseOrigin.TrackingUniverseStanding, ref transform);
-
-			OpenVR.Overlay.SetOverlayCurvature(OverlayHandle, 0.25f);
-
 			MyGuiSandbox.AddScreen(new MouseOverlay());
 
 			Player.Player.OnPlayerFloorChanged += RepositionOverlay;
-			Common.Config.uiDepth.onValueChanged += _ => RepositionOverlay();
-			Common.Config.resolutionScale.onValueChanged += _ => RepositionOverlay();
+			Main.Config.uiDepth.onValueChanged += _ => RepositionOverlay();
+			Main.Config.resolutionScale.onValueChanged += _ => RepositionOverlay();
 		}
 
 		private static void RepositionOverlay()
@@ -46,11 +33,11 @@ namespace SpaceEngineersVR.GUI
 			mat.Forward = Vector3.Forward;
 			mat.Up = Vector3.Up;
 			mat.Right = Vector3.Right;
-			mat.Translation += mat.Forward * Common.Config.uiDepth.value;
+			mat.Translation += mat.Forward * Main.Config.uiDepth.value;
 			HmdMatrix34_t transform = mat.ToHMDMatrix34();
 			OpenVR.Overlay.SetOverlayTransformAbsolute(OverlayHandle, ETrackingUniverseOrigin.TrackingUniverseStanding, ref transform);
 
-			OpenVR.Overlay.SetOverlayWidthInMeters(OverlayHandle, Common.Config.resolutionScale.value * Common.Config.uiDepth.value);
+			OpenVR.Overlay.SetOverlayWidthInMeters(OverlayHandle, Main.Config.resolutionScale.value * Main.Config.uiDepth.value);
 
 			OpenVR.Overlay.SetOverlayCurvature(OverlayHandle, 0.35f);
 		}

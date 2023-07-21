@@ -15,7 +15,7 @@ namespace SpaceEngineersVR.Plugin
 		static Logger()
 		{
 			myLog = new MyLog(true);
-			myLog.InitWithDate(Common.Name, new StringBuilder(Common.Version.ToString()), 7);
+			myLog.InitWithDate(Main.Name, new StringBuilder(Main.Version.ToString()), 7);
 			myLog.LogFlag(LoggingOptions.ALL);
 		}
 
@@ -143,7 +143,7 @@ namespace SpaceEngineersVR.Plugin
 			if (message == null)
 				message = "";
 
-			sb.Append(Common.Name);
+			sb.Append(Main.Name);
 
 			//Spacer
 			sb.Append(": ");
