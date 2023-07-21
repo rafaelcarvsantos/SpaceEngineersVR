@@ -558,7 +558,7 @@
     <Compile Include="Player\Controls.cs" />
     <Compile Include="Player\Headset.cs" />
     <Compile Include="Plugin\Main.cs" />
-    <Compile Include="Plugin\Common.cs" />
+    <Compile Include="Plugin\Assets.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\Angle.cs" />
     <Compile Include="Utils\Extensions.cs" />

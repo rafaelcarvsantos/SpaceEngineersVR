@@ -80,7 +80,7 @@ namespace SpaceEngineersVR.GUI
 		{
 			AddCaption(Caption);
 
-			PluginConfig config = Common.Config;
+			PluginConfig config = Main.Config;
 			CreateCheckbox(
 				out enableKeyboardAndMouseControlsLabel, out enableKeyboardAndMouseControlsCheckbox,
 				config.enableKeyboardAndMouseControls.value, value => config.enableKeyboardAndMouseControls.value = value,
