@@ -80,9 +80,16 @@ namespace SpaceEngineersVR.GUI
 		{
 			AddCaption(Caption);
 
-			var config = Common.Config;
-			CreateCheckbox(out enableKeyboardAndMouseControlsLabel, out enableKeyboardAndMouseControlsCheckbox, config.enableKeyboardAndMouseControls.value, value => config.enableKeyboardAndMouseControls.value = value, "Enable Keyboard And Mouse Controls", "Enables keyboard and mouse controls.");
-			CreateCheckbox(out enableCharacterRenderingLabel, out enableCharacterRenderingCheckbox, config.enableCharacterRendering.value, value => config.enableCharacterRendering.value = value, "Enable Character Rendering", "Enables rendering the character.");
+			PluginConfig config = Common.Config;
+			CreateCheckbox(
+				out enableKeyboardAndMouseControlsLabel, out enableKeyboardAndMouseControlsCheckbox,
+				config.enableKeyboardAndMouseControls.value, value => config.enableKeyboardAndMouseControls.value = value,
+				"Enable Keyboard And Mouse Controls",
+				"Enables keyboard and mouse controls.");
+			CreateCheckbox(out enableCharacterRenderingLabel, out enableCharacterRenderingCheckbox,
+				config.enableCharacterRendering.value, value => config.enableCharacterRendering.value = value,
+				"Enable Character Rendering",
+				"When unchecked the player's character will not be visible.");
 			CreateCheckbox(out useHeadRotationForCharacterLabel, out useHeadRotationForCharacterCheckbox, config.useHeadRotationForCharacter.value, value => config.useHeadRotationForCharacter.value = value, "Use Head Rotation For Character", "Character turns when you turn your head, otherwise they always face your SteamVR forward direction.");
 
 			characterScalingModeLabel = new MyGuiControlLabel()
@@ -107,116 +114,34 @@ namespace SpaceEngineersVR.GUI
 			};
 
 
-			string ResolutionLabelStr() => $"Resolution Scale ({config.resolutionScale:P0})";
-			resolutionScaleLabel = new MyGuiControlLabel
-			{
-				Text = ResolutionLabelStr(),
-			};
-			resolutionScaleSlider = new MyGuiControlSlider
-			{
-				MinValue = config.resolutionScale.min,
-				MaxValue = config.resolutionScale.max,
-				DefaultValue = config.resolutionScale.defaultValue,
-				Value = config.resolutionScale.value,
-				ValueChanged = (slider) =>
-				{
-					config.resolutionScale.value = slider.Value;
-					resolutionScaleLabel.Text = ResolutionLabelStr();
-				},
-			};
+			CreateSlider(out resolutionScaleLabel, out resolutionScaleSlider, Plugin.Main.Config.resolutionScale,
+				v => v, v => v,
+				v => $"Resolution Scale ({v:P0})",
+				"Changes the ingame resolution to be higher or lower than the headsets to increase image quality at the cost of performance, and vice versa.");
 
+			CreateSlider(out handActivationPitchLabel, out handActivationPitchSlider, Plugin.Main.Config.handActivationPitch,
+				v => v.radians, v => AngleF.Radian(v),
+				v => $"Hand Activation Pitch ({v.degrees:0} degrees)",
+				"Adjusts the pitch of the ray from the primary hand used to interact with things like button.");
+			CreateSlider(out handActivationYawLabel, out handActivationYawSlider, Plugin.Main.Config.handActivationYaw,
+				v => v.radians, v => AngleF.Radian(v),
+				v => $"Hand Activation Yaw ({v.degrees:0} degrees)",
+				"Adjusts the yaw of the ray from the primary hand used to interact with things like button.");
 
-			string HandActivationPitchLabelStr() => $"Hand Activation Pitch ({config.handActivationPitch:0} degrees)";
-			handActivationPitchLabel = new MyGuiControlLabel
-			{
-				Text = HandActivationPitchLabelStr(),
-			};
-			handActivationPitchSlider = new MyGuiControlSlider
-			{
-				MinValue = config.handActivationPitch.min.degrees,
-				MaxValue = config.handActivationPitch.max.degrees,
-				DefaultValue = config.handActivationPitch.defaultValue.degrees,
-				Value = config.handActivationPitch.value.degrees,
-				ValueChanged = (slider) =>
-				{
-					config.handActivationPitch.value = AngleF.Degrees(slider.Value);
-					handActivationPitchLabel.Text = HandActivationPitchLabelStr();
-				},
-			};
+			CreateSlider(out handAimPitchLabel, out handAimPitchSlider, Plugin.Main.Config.handAimPitch,
+				v => v.radians, v => AngleF.Radian(v),
+				v => $"Hand Aim Pitch ({v.degrees:0} degrees)",
+				"Adjusts the pitch of tools and weapons when held.");
+			CreateSlider(out handAimYawLabel, out handAimYawSlider, Plugin.Main.Config.handAimYaw,
+				v => v.radians, v => AngleF.Radian(v),
+				v => $"Hand Aim Yaw ({v.degrees:0} degrees)",
+				"Adjusts the yaw of tools and weapons when held.");
 
-			string HandActivationYawLabelStr() => $"Hand Activation Yaw ({config.handActivationYaw.value.degrees:0} degrees)";
-			handActivationYawLabel = new MyGuiControlLabel
-			{
-				Text = HandActivationYawLabelStr(),
-			};
-			handActivationYawSlider = new MyGuiControlSlider
-			{
-				MinValue = config.handActivationYaw.min.degrees,
-				MaxValue = config.handActivationYaw.max.degrees,
-				DefaultValue = config.handActivationYaw.defaultValue.degrees,
-				Value = config.handActivationYaw.value.degrees,
-				ValueChanged = (slider) =>
-				{
-					config.handActivationYaw.value = AngleF.Degrees(slider.Value);
-					handActivationYawLabel.Text = HandActivationYawLabelStr();
-				},
-			};
+			CreateSlider(out uiDepthLabel, out uiDepthSlider, Plugin.Main.Config.uiDepth,
+				v => v, v => v,
+				v => $"UI Depth ({config.uiDepth:0.00} meters)",
+				"Changes the distance the UI is from your head position.");
 
-
-			string HandAimPitchLabelStr() => $"Hand Aim Pitch ({config.handAimPitch:0} degrees)";
-			handAimPitchLabel = new MyGuiControlLabel
-			{
-				Text = HandAimPitchLabelStr(),
-			};
-			handAimPitchSlider = new MyGuiControlSlider
-			{
-				MinValue = config.handAimPitch.min.degrees,
-				MaxValue = config.handAimPitch.max.degrees,
-				DefaultValue = config.handAimPitch.defaultValue.degrees,
-				Value = config.handAimPitch.value.degrees,
-				ValueChanged = (slider) =>
-				{
-					config.handAimPitch.value = AngleF.Degrees(slider.Value);
-					handAimPitchLabel.Text = HandAimPitchLabelStr();
-				},
-			};
-
-			string HandAimYawLabelStr() => $"Hand Aim Yaw ({config.handAimYaw.value.degrees:0} degrees)";
-			handAimYawLabel = new MyGuiControlLabel
-			{
-				Text = HandAimYawLabelStr(),
-			};
-			handAimYawSlider = new MyGuiControlSlider
-			{
-				MinValue = config.handAimYaw.min.degrees,
-				MaxValue = config.handAimYaw.max.degrees,
-				DefaultValue = config.handAimYaw.defaultValue.degrees,
-				Value = config.handAimYaw.value.degrees,
-				ValueChanged = (slider) =>
-				{
-					config.handAimYaw.value = AngleF.Degrees(slider.Value);
-					handAimYawLabel.Text = HandAimYawLabelStr();
-				},
-			};
-
-
-			string UIDepthLabelStr() => $"UI Depth ({config.uiDepth:0.00} meters)";
-			uiDepthLabel = new MyGuiControlLabel
-			{
-				Text = UIDepthLabelStr(),
-			};
-			uiDepthSlider = new MyGuiControlSlider
-			{
-				MinValue = config.uiDepth.min,
-				MaxValue = config.uiDepth.max,
-				DefaultValue = config.uiDepth.defaultValue,
-				Value = config.uiDepth.value,
-				ValueChanged = (slider) =>
-				{
-					config.uiDepth.value = slider.Value;
-					uiDepthLabel.Text = UIDepthLabelStr();
-				},
-			};
 
 
 			infoText = new MyGuiControlMultilineText
@@ -249,6 +174,36 @@ namespace SpaceEngineersVR.GUI
 				IsChecked = value
 			};
 			checkboxControl.IsCheckedChanged += cb => store(cb.IsChecked);
+		}
+		private void CreateSlider<T>(out MyGuiControlLabel labelControl, out MyGuiControlSlider sliderControl, PluginConfig.Range<T> range, Func<T, float> get, Func<float, T> set, Func<T, string> labelText, string tooltip) where T : IComparable<T>
+		{
+			labelControl = new MyGuiControlLabel()
+			{
+				Text = labelText(range.value),
+				OriginAlign = MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_TOP
+			};
+
+			MyGuiControlLabel labelCapture = labelControl;
+			sliderControl = new MyGuiControlSlider(toolTip: tooltip)
+			{
+				OriginAlign = MyGuiDrawAlignEnum.HORISONTAL_CENTER_AND_VERTICAL_TOP,
+				Enabled = true,
+				MinValue = get(range.min),
+				MaxValue = get(range.max),
+				DefaultValue = get(range.defaultValue),
+				Value = get(range.value),
+				ValueChanged = (control) =>
+				{
+					range.value = set(control.Value);
+					labelCapture.Text = labelText(range.value);
+				},
+			};
+
+			if(range is PluginConfig.Slider<T> slider)
+			{
+				sliderControl.SnapSliderToSteps = true;
+				sliderControl.StepLength = sliderControl.Propeties.ValueToRatio(get(slider.snap));
+			}
 		}
 
 		private void LayoutControls()

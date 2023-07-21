@@ -2,13 +2,14 @@ using SpaceEngineersVR.Player.Components;
 using SpaceEngineersVR.Plugin;
 using SpaceEngineersVR.Utils;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Xml;
 using System.Xml.Schema;
 using System.Xml.Serialization;
 using VRage.Utils;
-using static System.BitStreamExtensions;
 
 namespace SpaceEngineersVR.Config
 {
@@ -38,32 +39,32 @@ namespace SpaceEngineersVR.Config
 		public Slider<float> uiDepth = new Slider<float>(0.1f, 10f, 0.5f, 0.1f);
 
 
-
-		public struct Value<T> : IXmlSerializable
+		private IEnumerable<IValue> values()
 		{
-			public Value(T defaultValue)
+			return typeof(PluginConfig).GetFields().Where(f => f.FieldType.IsSubclassOf(typeof(IValue))).Cast<IValue>();
+		}
+
+		private interface IValue
+		{
+			void Load(IValue from);
+		}
+
+		public class ValueBase<T> : IXmlSerializable, IValue
+		{
+			public ValueBase()
+			{
+			}
+			public ValueBase(T defaultValue)
 			{
 				this.defaultValue = defaultValue;
 				internalValue = defaultValue;
-				onValueChanged = null;
 			}
 
 			public readonly T defaultValue;
-
-			public T value
-			{
-				get => internalValue;
-				set
-				{
-					internalValue = value;
-					onValueChanged.InvokeIfNotNull(internalValue);
-					Common.Config.SaveLater();
-				}
-			}
-
-			private T internalValue;
-
+			protected T internalValue;
 			public event Action<T> onValueChanged;
+
+			protected void ValueChanged(T value) { onValueChanged.InvokeIfNotNull(value); }
 
 			public XmlSchema GetSchema() => null;
 			public void ReadXml(XmlReader reader)
@@ -86,20 +87,45 @@ namespace SpaceEngineersVR.Config
 
 				writer.WriteValue(internalValue);
 			}
+
+			void IValue.Load(IValue from)
+			{
+				internalValue = ((ValueBase<T>)from).internalValue;
+			}
 		}
 
-		public struct Range<T> : IXmlSerializable where T : IComparable<T>
+		public class Value<T> : ValueBase<T>
 		{
-			public Range(T min, T max, T defaultValue)
+			public Value() : base()
 			{
-				this.defaultValue = defaultValue;
-				this.min = min;
-				this.max = max;
-				internalValue = defaultValue;
-				onValueChanged = null;
+			}
+			public Value(T defaultValue) : base(defaultValue)
+			{
 			}
 
-			public readonly T defaultValue;
+			public T value
+			{
+				get => internalValue;
+				set
+				{
+					internalValue = value;
+					ValueChanged(internalValue);
+					Common.Config.SaveLater();
+				}
+			}
+		}
+
+		public class Range<T> : ValueBase<T> where T : IComparable<T>
+		{
+			public Range() : base()
+			{
+			}
+			public Range(T min, T max, T defaultValue) : base(defaultValue)
+			{
+				this.min = min;
+				this.max = max;
+			}
+
 			public readonly T min;
 			public readonly T max;
 
@@ -114,115 +140,42 @@ namespace SpaceEngineersVR.Config
 						value = max;
 
 					internalValue = value;
-					onValueChanged.InvokeIfNotNull(internalValue);
+					ValueChanged(internalValue);
 					Common.Config.SaveLater();
 				}
 			}
-
-			private T internalValue;
-
-			public event Action<T> onValueChanged;
-
-			public XmlSchema GetSchema() => null;
-			public void ReadXml(XmlReader reader)
-			{
-				if (internalValue is IXmlSerializable serializable)
-				{
-					serializable.ReadXml(reader);
-					return;
-				}
-
-				internalValue = (T)reader.ReadElementContentAs(typeof(T), null);
-			}
-			public void WriteXml(XmlWriter writer)
-			{
-				if (internalValue is IXmlSerializable serializable)
-				{
-					serializable.WriteXml(writer);
-					return;
-				}
-
-				writer.WriteString(internalValue.ToString());
-			}
 		}
 
-		public struct Slider<T> : IXmlSerializable where T : IComparable<T>
+		public class Slider<T> : Range<T> where T : IComparable<T>
 		{
-			public Slider(T min, T max, T defaultValue, T snap)
+			public Slider() : base()
 			{
-				this.min = min;
-				this.max = max;
-				this.defaultValue = defaultValue;
+			}
+			public Slider(T min, T max, T defaultValue, T snap) : base(min, max, defaultValue)
+			{
 				this.snap = snap;
-
-				internalValue = defaultValue;
-
-				onValueChanged = null;
 			}
 
-			public readonly T min;
-			public readonly T max;
-			public readonly T defaultValue;
 			public readonly T snap;
-
-			public T value
-			{
-				get => internalValue;
-				set
-				{
-					if (value.CompareTo(min) < 0)
-						value = min;
-					else if (value.CompareTo(max) > 0)
-						value = max;
-
-					internalValue = value;
-					onValueChanged.InvokeIfNotNull(internalValue);
-					Common.Config.SaveLater();
-				}
-			}
-
-			private T internalValue;
-
-			public event Action<T> onValueChanged;
-
-			public XmlSchema GetSchema() => null;
-			public void ReadXml(XmlReader reader)
-			{
-				if (internalValue is IXmlSerializable serializable)
-				{
-					serializable.ReadXml(reader);
-					return;
-				}
-
-				internalValue = (T)reader.ReadElementContentAs(typeof(T), null);
-			}
-			public void WriteXml(XmlWriter writer)
-			{
-				if (internalValue is IXmlSerializable serializable)
-				{
-					serializable.WriteXml(writer);
-					return;
-				}
-
-				writer.WriteString(internalValue.ToString());
-			}
 		}
 
 
-		private Timer saveConfigTimer;
+		private readonly Timer saveConfigTimer;
 		private const int SaveDelay = 500;
 
 		private string path;
 
-		private void SaveLater()
+		public PluginConfig()
 		{
-			if (saveConfigTimer == null)
-				saveConfigTimer = new Timer(x => Save());
+			saveConfigTimer = new Timer(x => Save());
+		}
 
+		public void SaveLater()
+		{
 			saveConfigTimer.Change(SaveDelay, -1);
 		}
 
-		private void Save()
+		public void Save()
 		{
 			using (StreamWriter text = File.CreateText(path))
 				new XmlSerializer(typeof(PluginConfig)).Serialize(text, this);
@@ -230,6 +183,10 @@ namespace SpaceEngineersVR.Config
 
 		public static PluginConfig Load(string path)
 		{
+			PluginConfig config = new PluginConfig
+			{
+				path = path
+			};
 			try
 			{
 				if (File.Exists(path))
@@ -237,8 +194,13 @@ namespace SpaceEngineersVR.Config
 					XmlSerializer xmlSerializer = new XmlSerializer(typeof(PluginConfig));
 					using (StreamReader streamReader = File.OpenText(path))
 					{
-						PluginConfig config = (PluginConfig)xmlSerializer.Deserialize(streamReader);
-						config.path = path;
+						//XmlSerializer overwrites each field/property with default constructed objects, so all our values lose the defaultValue, min, max, etc.
+						//so we load a dummy config, then extract the loaded values into the real config
+						PluginConfig loaded = (PluginConfig)xmlSerializer.Deserialize(streamReader);
+						foreach((IValue value, IValue load) in config.values().Zip(loaded.values(), (value, load) => (value, load)))
+						{
+							value.Load(load);
+						}
 						return config;
 					}
 				}
@@ -264,10 +226,6 @@ namespace SpaceEngineersVR.Config
 
 			{
 				MyLog.Default.WriteLine($"SpaceEngineersVR: Writing default configuration file: {path}");
-				PluginConfig config = new PluginConfig
-				{
-					path = path
-				};
 				config.Save();
 				return config;
 			}
