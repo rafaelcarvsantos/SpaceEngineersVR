@@ -15,33 +15,60 @@ namespace SpaceEngineersVR.Config
 {
 	public class PluginConfig
 	{
-		public Value<bool> enableKeyboardAndMouseControls = new Value<bool>(true);
-		public Value<bool> enableCharacterRendering = new Value<bool>(true);
+		public Value<bool> enableKeyboardAndMouseControls = new Value<bool>(true,
+			_ => "Enable Keyboard And Mouse Controls",
+			"Enables keyboard and mouse controls.");
+		public Value<bool> enableCharacterRendering = new Value<bool>(true,
+			_ => "Enable Character Rendering",
+			"When unchecked the player's character will not be visible.");
 
-		public Value<bool> useHeadRotationForCharacter = new Value<bool>(true);
+		public Value<bool> useHeadRotationForCharacter = new Value<bool>(true,
+			_ => "Use Head Rotation For Character",
+			"Character turns when you turn your head, otherwise they always face your SteamVR forward direction.");
 
-		public Range<int> bodyScalingModeIndex = new Range<int>(0, VRBodyComponent.ScalingModes.Count - 1, VRBodyComponent.DefaultScalingMode);
-
-
-		public Value<float> playerHeight = new Value<float>(1.69f);
-		public Value<float> playerArmSpan = new Value<float>(1.66f);
-
-
-		public Slider<float> resolutionScale = new Slider<float>(0.1f, 2.0f, 1.0f, 0.05f);
+		public Range<int> bodyScalingModeIndex = new Range<int>(0, VRBodyComponent.ScalingModes.Count - 1, VRBodyComponent.DefaultScalingMode,
+			_ => "Character Scaling Mode",
+			"Changes if/how your real-world motions are scaled in-game.");
 
 
-		public Slider<AngleF> handActivationPitch = new Slider<AngleF>(AngleF.Degrees(-180f), AngleF.Degrees(180f), AngleF.Degrees(-90f), AngleF.Degrees(1f));
-		public Slider<AngleF> handActivationYaw = new Slider<AngleF>(AngleF.Degrees(-180f), AngleF.Degrees(180f), AngleF.Degrees(0f), AngleF.Degrees(1f));
+		public Slider<float> playerHeight = new Slider<float>(0.1f, 2.5f, 1.69f, 0.01f,
+			v => $"Player height ({v:0.00} meters)",
+			"The real-world height to your headset in meters. Press Numpad-0 in game to calibrate this (measures over a 5 second period).");
+		public Slider<float> playerArmSpan = new Slider<float>(0.1f, 2.5f, 1.66f, 0.01f,
+			v => $"Player arm span ({v:0.00} meters)",
+			"Your real-world arm span in meters. Press Numpad-0 in game and then T pose to calibrate this (measures over a 5 second period).");
 
-		public Slider<AngleF> handAimPitch = new Slider<AngleF>(AngleF.Degrees(-180f), AngleF.Degrees(180f), AngleF.Degrees(-60f), AngleF.Degrees(1f));
-		public Slider<AngleF> handAimYaw = new Slider<AngleF>(AngleF.Degrees(-180f), AngleF.Degrees(180f), AngleF.Degrees(0f), AngleF.Degrees(1f));
 
-		public Slider<float> uiDepth = new Slider<float>(0.1f, 10f, 0.5f, 0.1f);
+		public Slider<float> resolutionScale = new Slider<float>(0.1f, 2.0f, 1.0f, 0.05f,
+				v => $"Resolution Scale ({v:P0})",
+				"Changes the ingame resolution to be higher or lower than the headsets to increase image quality at the cost of performance, and vice versa.");
+
+
+		public Slider<AngleF> handActivationPitch = new Slider<AngleF>(AngleF.Degrees(-180f), AngleF.Degrees(180f), AngleF.Degrees(-90f), AngleF.Degrees(1f),
+				v => $"Hand Activation Pitch ({v.degrees:0} degrees)",
+				"Adjusts the pitch of the ray from the primary hand used to interact with things like button.");
+		public Slider<AngleF> handActivationYaw = new Slider<AngleF>(AngleF.Degrees(-180f), AngleF.Degrees(180f), AngleF.Degrees(0f), AngleF.Degrees(1f),
+				v => $"Hand Activation Yaw ({v.degrees:0} degrees)",
+				"Adjusts the yaw of the ray from the primary hand used to interact with things like button.");
+
+		public Slider<AngleF> handAimPitch = new Slider<AngleF>(AngleF.Degrees(-180f), AngleF.Degrees(180f), AngleF.Degrees(-60f), AngleF.Degrees(1f),
+				v => $"Hand Aim Pitch ({v.degrees:0} degrees)",
+				"Adjusts the pitch of tools and weapons when held.");
+		public Slider<AngleF> handAimYaw = new Slider<AngleF>(AngleF.Degrees(-180f), AngleF.Degrees(180f), AngleF.Degrees(0f), AngleF.Degrees(1f),
+				v => $"Hand Aim Yaw ({v.degrees:0} degrees)",
+				"Adjusts the yaw of tools and weapons when held.");
+
+		public Slider<float> uiDepth = new Slider<float>(0.1f, 10f, 0.5f, 0.01f,
+				v => $"UI Depth ({v:0.00} meters)",
+				"Changes the distance the UI is from your head position.");
+		public Slider<float> uiWidth = new Slider<float>(0.1f, 2.5f, 2f, 0.01f,
+				v => $"UI Width ({v:0.00} meters)",
+				"Changes the size of the UI.");
 
 
 		private IEnumerable<IValue> values()
 		{
-			return typeof(PluginConfig).GetFields().Where(f => f.FieldType.IsSubclassOf(typeof(IValue))).Cast<IValue>();
+			return typeof(PluginConfig).GetFields().Where(f => f.FieldType.GetInterfaces().Contains(typeof(IValue))).Select(f => f.GetValue(this)).Cast<IValue>();
 		}
 
 		private interface IValue
@@ -51,18 +78,23 @@ namespace SpaceEngineersVR.Config
 
 		public class ValueBase<T> : IXmlSerializable, IValue
 		{
-			public ValueBase()
+			public ValueBase() //needed for deserialization
 			{
 			}
-			public ValueBase(T defaultValue)
+			public ValueBase(T defaultValue, Func<T, string> labelGenerator, string tooltip)
 			{
 				this.defaultValue = defaultValue;
 				internalValue = defaultValue;
+				this.labelGenerator = labelGenerator;
+				this.tooltip = tooltip;
 			}
 
 			public readonly T defaultValue;
 			protected T internalValue;
 			public event Action<T> onValueChanged;
+
+			public readonly Func<T, string> labelGenerator;
+			public readonly string tooltip;
 
 			protected void ValueChanged(T value) { onValueChanged.InvokeIfNotNull(value); }
 
@@ -99,7 +131,7 @@ namespace SpaceEngineersVR.Config
 			public Value() : base()
 			{
 			}
-			public Value(T defaultValue) : base(defaultValue)
+			public Value(T defaultValue, Func<T, string> labelGenerator, string tooltip) : base(defaultValue, labelGenerator, tooltip)
 			{
 			}
 
@@ -120,7 +152,7 @@ namespace SpaceEngineersVR.Config
 			public Range() : base()
 			{
 			}
-			public Range(T min, T max, T defaultValue) : base(defaultValue)
+			public Range(T min, T max, T defaultValue, Func<T, string> labelGenerator, string tooltip) : base(defaultValue, labelGenerator, tooltip)
 			{
 				this.min = min;
 				this.max = max;
@@ -151,7 +183,7 @@ namespace SpaceEngineersVR.Config
 			public Slider() : base()
 			{
 			}
-			public Slider(T min, T max, T defaultValue, T snap) : base(min, max, defaultValue)
+			public Slider(T min, T max, T defaultValue, T snap, Func<T, string> labelGenerator, string tooltip) : base(min, max, defaultValue, labelGenerator, tooltip)
 			{
 				this.snap = snap;
 			}

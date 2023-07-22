@@ -1,4 +1,5 @@
-﻿using Sandbox.Graphics.GUI;
+﻿using Epic.OnlineServices;
+using Sandbox.Graphics.GUI;
 using SharpDX.Direct3D11;
 using SpaceEngineersVR.Config;
 using SpaceEngineersVR.Plugin;
@@ -24,7 +25,7 @@ namespace SpaceEngineersVR.GUI
 
 			Player.Player.OnPlayerFloorChanged += RepositionOverlay;
 			Main.Config.uiDepth.onValueChanged += _ => RepositionOverlay();
-			Main.Config.resolutionScale.onValueChanged += _ => RepositionOverlay();
+			Main.Config.uiWidth.onValueChanged += _ => RepositionOverlay();
 		}
 
 		private static void RepositionOverlay()
@@ -37,7 +38,7 @@ namespace SpaceEngineersVR.GUI
 			HmdMatrix34_t transform = mat.ToHMDMatrix34();
 			OpenVR.Overlay.SetOverlayTransformAbsolute(OverlayHandle, ETrackingUniverseOrigin.TrackingUniverseStanding, ref transform);
 
-			OpenVR.Overlay.SetOverlayWidthInMeters(OverlayHandle, Main.Config.resolutionScale.value * Main.Config.uiDepth.value);
+			OpenVR.Overlay.SetOverlayWidthInMeters(OverlayHandle, Main.Config.uiWidth.value * Main.Config.uiDepth.value);
 
 			OpenVR.Overlay.SetOverlayCurvature(OverlayHandle, 0.35f);
 		}

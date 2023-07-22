@@ -8,13 +8,13 @@ namespace SpaceEngineersVR.Utils
 {
 	public struct AngleF : IComparable<AngleF>, IEquatable<AngleF>, IXmlSerializable
 	{
-		public const double Rad2Deg = Math.PI / 180.0;
-		public const float Rad2DegF = (float)Math.PI / 180f;
-		public const double Deg2Rad = 180.0 / Math.PI;
-		public const float Deg2RadF = 180f / (float)Math.PI;
+		public const double Rad2Deg = 180.0 / Math.PI;
+		public const float Rad2DegF = 180f / (float)Math.PI;
+		public const double Deg2Rad = Math.PI / 180.0;
+		public const float Deg2RadF = (float)Math.PI / 180f;
 
 		public static AngleF Radian(float radians) => new AngleF(radians);
-		public static AngleF Degrees(float degrees) => new AngleF(degrees * Rad2DegF);
+		public static AngleF Degrees(float degrees) => new AngleF(degrees * Deg2RadF);
 
 		private AngleF(float radians)
 		{
@@ -25,7 +25,7 @@ namespace SpaceEngineersVR.Utils
 		[XmlIgnore]
 		public float degrees
 		{
-			get => MathHelper.ToRadians(radians);
+			get => radians * Rad2DegF;
 			set => radians = value * Deg2RadF;
 		}
 
