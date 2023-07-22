@@ -156,7 +156,7 @@ namespace SpaceEngineersVR.Plugin
 		// ReSharper disable once UnusedMember.Global
 		public void OpenConfigDialog()
 		{
-			MyGuiSandbox.AddScreen(new MyPluginConfigDialog());
+			MyGuiSandbox.AddScreen(new ConfigDialog());
 		}
 
 		public void AfterLoadedWorld()

@@ -1,6 +1,5 @@
 using Sandbox;
 using Sandbox.Graphics.GUI;
-using SpaceEngineersVR.Config;
 using SpaceEngineersVR.Player.Components;
 using SpaceEngineersVR.Plugin;
 using SpaceEngineersVR.Utils;
@@ -13,7 +12,7 @@ using VRageMath;
 
 namespace SpaceEngineersVR.GUI
 {
-	public class MyPluginConfigDialog : MyGuiScreenBase
+	public class ConfigDialog : MyGuiScreenBase
 	{
 		private const string Caption = "Space Engineers VR Configuration";
 		public override string GetFriendlyName() => "MyPluginConfigDialog";
@@ -28,7 +27,7 @@ namespace SpaceEngineersVR.GUI
 
 		private readonly List<LabelControlPair> configControls = new List<LabelControlPair>();
 
-		public MyPluginConfigDialog() : base(new Vector2(0.5f, 0.5f), MyGuiConstants.SCREEN_BACKGROUND_COLOR, new Vector2(0.7f, 0.8f), false, null, MySandboxGame.Config.UIBkOpacity, MySandboxGame.Config.UIOpacity)
+		public ConfigDialog() : base(new Vector2(0.5f, 0.5f), MyGuiConstants.SCREEN_BACKGROUND_COLOR, new Vector2(0.7f, 0.8f), false, null, MySandboxGame.Config.UIBkOpacity, MySandboxGame.Config.UIOpacity)
 		{
 			EnabledBackgroundFade = true;
 			m_closeOnEsc = true;
