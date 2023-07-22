@@ -531,7 +531,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Config\PluginConfig.cs" />
+    <Compile Include="Config\Config.cs" />
     <Compile Include="GUI\MouseOverlay.cs" />
     <Compile Include="GUI\MyPluginConfigDialog.cs" />
     <Compile Include="Patches\TranspilerHelper.cs" />

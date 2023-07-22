@@ -53,7 +53,7 @@ namespace SpaceEngineersVR.GUI
 
 		private void CreateControls()
 		{
-			PluginConfig config = Main.Config;
+			Config.Config config = Main.Config;
 
 			configControls.Clear();
 
@@ -113,7 +113,7 @@ namespace SpaceEngineersVR.GUI
 
 		private void OnOk(MyGuiControlButton _) => CloseScreen();
 
-		private void CreateCheckbox(PluginConfig.Value<bool> value)
+		private void CreateCheckbox(Config.Config.Value<bool> value)
 		{
 			MyGuiControlLabel labelControl = new MyGuiControlLabel
 			{
@@ -134,7 +134,7 @@ namespace SpaceEngineersVR.GUI
 
 			configControls.Add(new LabelControlPair() { label = labelControl, control = checkboxControl });
 		}
-		private void CreateSlider<T>(PluginConfig.Range<T> range, Func<T, float> get, Func<float, T> set) where T : IComparable<T>
+		private void CreateSlider<T>(Config.Config.Range<T> range, Func<T, float> get, Func<float, T> set) where T : IComparable<T>
 		{
 			MyGuiControlLabel labelControl = new MyGuiControlLabel()
 			{
@@ -157,7 +157,7 @@ namespace SpaceEngineersVR.GUI
 				},
 			};
 
-			if(range is PluginConfig.Slider<T> slider)
+			if(range is Config.Config.Slider<T> slider)
 			{
 				sliderControl.SnapSliderToSteps = true;
 				sliderControl.StepLength = get(slider.snap) / (sliderControl.MaxValue - sliderControl.MinValue);
@@ -166,7 +166,7 @@ namespace SpaceEngineersVR.GUI
 			configControls.Add(new LabelControlPair() { label = labelControl, control = sliderControl });
 		}
 
-		private void CreateScalingModeListBox(PluginConfig.Range<int> range)
+		private void CreateScalingModeListBox(Config.Config.Range<int> range)
 		{
 			MyGuiControlLabel label = new MyGuiControlLabel()
 			{

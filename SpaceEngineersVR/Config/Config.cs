@@ -13,7 +13,7 @@ using VRage.Utils;
 
 namespace SpaceEngineersVR.Config
 {
-	public class PluginConfig
+	public class Config
 	{
 		public Value<bool> enableKeyboardAndMouseControls = new Value<bool>(true,
 			_ => "Enable Keyboard And Mouse Controls",
@@ -68,7 +68,7 @@ namespace SpaceEngineersVR.Config
 
 		private IEnumerable<IValue> values()
 		{
-			return typeof(PluginConfig).GetFields().Where(f => f.FieldType.GetInterfaces().Contains(typeof(IValue))).Select(f => f.GetValue(this)).Cast<IValue>();
+			return typeof(Config).GetFields().Where(f => f.FieldType.GetInterfaces().Contains(typeof(IValue))).Select(f => f.GetValue(this)).Cast<IValue>();
 		}
 
 		private interface IValue
@@ -197,7 +197,7 @@ namespace SpaceEngineersVR.Config
 
 		private string path;
 
-		public PluginConfig()
+		public Config()
 		{
 			saveConfigTimer = new Timer(x => Save());
 		}
@@ -210,12 +210,12 @@ namespace SpaceEngineersVR.Config
 		public void Save()
 		{
 			using (StreamWriter text = File.CreateText(path))
-				new XmlSerializer(typeof(PluginConfig)).Serialize(text, this);
+				new XmlSerializer(typeof(Config)).Serialize(text, this);
 		}
 
-		public static PluginConfig Load(string path)
+		public static Config Load(string path)
 		{
-			PluginConfig config = new PluginConfig
+			Config config = new Config
 			{
 				path = path
 			};
@@ -223,12 +223,12 @@ namespace SpaceEngineersVR.Config
 			{
 				if (File.Exists(path))
 				{
-					XmlSerializer xmlSerializer = new XmlSerializer(typeof(PluginConfig));
+					XmlSerializer xmlSerializer = new XmlSerializer(typeof(Config));
 					using (StreamReader streamReader = File.OpenText(path))
 					{
 						//XmlSerializer overwrites each field/property with default constructed objects, so all our values lose the defaultValue, min, max, etc.
 						//so we load a dummy config, then extract the loaded values into the real config
-						PluginConfig loaded = (PluginConfig)xmlSerializer.Deserialize(streamReader);
+						Config loaded = (Config)xmlSerializer.Deserialize(streamReader);
 						foreach((IValue value, IValue load) in config.values().Zip(loaded.values(), (value, load) => (value, load)))
 						{
 							value.Load(load);

@@ -20,7 +20,7 @@ namespace SpaceEngineersVR.Plugin
 	public class Main : IPlugin
 	{
 		public static Harmony Harmony { get; private set; }
-		public static PluginConfig Config { get; private set; }
+		public static Config.Config Config { get; private set; }
 
 		public static readonly string Name = "SpaceEngineersVR";
 		public static readonly string PublicName = "Space Engineers VR";
@@ -37,7 +37,7 @@ namespace SpaceEngineersVR.Plugin
 		{
 			MyLog.Default.WriteLine("SpaceEngineersVR: starting...");
 			string configPath = Path.Combine(MyFileSystem.UserDataPath, Assets.ConfigFileName);
-			Config = PluginConfig.Load(configPath);
+			Config = SpaceEngineersVR.Config.Config.Load(configPath);
 
 			try
 			{
