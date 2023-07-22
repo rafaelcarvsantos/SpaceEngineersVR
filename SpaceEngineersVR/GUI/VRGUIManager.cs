@@ -1,7 +1,5 @@
-﻿using Epic.OnlineServices;
-using Sandbox.Graphics.GUI;
+﻿using Sandbox.Graphics.GUI;
 using SharpDX.Direct3D11;
-using SpaceEngineersVR.Config;
 using SpaceEngineersVR.Plugin;
 using SpaceEngineersVR.Util;
 using SpaceEngineersVR.Wrappers;

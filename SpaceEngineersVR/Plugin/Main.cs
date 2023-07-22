@@ -1,7 +1,6 @@
 ﻿using HarmonyLib;
 using Sandbox.Game.World;
 using Sandbox.Graphics.GUI;
-using SpaceEngineersVR.Config;
 using SpaceEngineersVR.GUI;
 using SpaceEngineersVR.Player.Components;
 using SpaceEngineersVR.Wrappers;

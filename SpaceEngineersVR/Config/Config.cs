@@ -229,7 +229,7 @@ namespace SpaceEngineersVR.Config
 						//XmlSerializer overwrites each field/property with default constructed objects, so all our values lose the defaultValue, min, max, etc.
 						//so we load a dummy config, then extract the loaded values into the real config
 						Config loaded = (Config)xmlSerializer.Deserialize(streamReader);
-						foreach((IValue value, IValue load) in config.values().Zip(loaded.values(), (value, load) => (value, load)))
+						foreach ((IValue value, IValue load) in config.values().Zip(loaded.values(), (value, load) => (value, load)))
 						{
 							value.Load(load);
 						}
@@ -262,6 +262,5 @@ namespace SpaceEngineersVR.Config
 				return config;
 			}
 		}
-
 	}
 }

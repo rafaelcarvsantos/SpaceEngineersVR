@@ -4,7 +4,6 @@ using Sandbox.Game.World;
 using Sandbox.ModAPI;
 using SharpDX.Direct3D11;
 using SharpDX.DXGI;
-using SpaceEngineersVR.Config;
 using SpaceEngineersVR.Player.Components;
 using SpaceEngineersVR.Plugin;
 using SpaceEngineersVR.Util;
@@ -276,7 +275,7 @@ namespace SpaceEngineersVR.Player
 
 		public override void MainUpdate()
 		{
-			var character = MyAPIGateway.Session?.Player?.Character;
+			VRage.Game.ModAPI.IMyCharacter character = MyAPIGateway.Session?.Player?.Character;
 			if (character != null)
 			{
 				if (character.Visible && !Main.Config.enableCharacterRendering.value)
@@ -325,7 +324,7 @@ namespace SpaceEngineersVR.Player
 					System.Drawing.Imaging.PixelFormat.Format32bppArgb
 				);
 
-			var image = new NotificationBitmap_t()
+			NotificationBitmap_t image = new NotificationBitmap_t()
 			{
 				m_pImageData = textureData.Scan0,
 				m_nWidth = textureData.Width,

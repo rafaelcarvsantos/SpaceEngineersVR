@@ -25,10 +25,11 @@ namespace SpaceEngineersVR.Util
 		}
 		public static unsafe void TransmuteTo(this object target, object source)
 		{
-			if (target.GetType() == source.GetType()) return;
+			if (target.GetType() == source.GetType())
+				return;
 
-			var s = (void**)source.GetObjectAddress();
-			var t = (void**)target.GetObjectAddress();
+			void** s = (void**)source.GetObjectAddress();
+			void** t = (void**)target.GetObjectAddress();
 			*t = *s;
 		}
 

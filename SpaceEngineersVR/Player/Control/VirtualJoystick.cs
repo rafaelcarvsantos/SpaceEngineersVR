@@ -1,6 +1,4 @@
-﻿using Sandbox.Game.World;
-using SpaceEngineersVR.Player.Components;
-using System;
+﻿using System;
 using VRageMath;
 
 namespace SpaceEngineersVR.Player.Control

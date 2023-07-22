@@ -12,7 +12,7 @@ namespace SpaceEngineersVR.Util
 	{
 		public static LeftRight Invert(this LeftRight lr)
 		{
-			switch(lr)
+			switch (lr)
 			{
 				case LeftRight.Left: return LeftRight.Right;
 				default:
@@ -39,7 +39,7 @@ namespace SpaceEngineersVR.Util
 		{
 			get
 			{
-				switch(lr)
+				switch (lr)
 				{
 					case LeftRight.Left: return left;
 					default:

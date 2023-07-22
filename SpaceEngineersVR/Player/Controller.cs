@@ -1,7 +1,4 @@
-﻿using Sandbox;
-using Sandbox.Game.World;
-using SpaceEngineersVR.Patches;
-using SpaceEngineersVR.Plugin;
+﻿using SpaceEngineersVR.Patches;
 using System;
 using Valve.VR;
 using VRageMath;

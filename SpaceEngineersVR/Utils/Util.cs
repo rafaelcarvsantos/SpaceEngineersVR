@@ -1,9 +1,6 @@
-using DirectShowLib;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using VRage.Game;
@@ -43,7 +40,7 @@ namespace SpaceEngineersVR.Util
 			DrawDebugRay(position, matrix.Left, Color.Green);
 			DrawDebugRay(position, matrix.Up, Color.Blue);
 
-			if(name != null)
+			if (name != null)
 				DrawDebugText(position, name);
 		}
 

@@ -2,8 +2,6 @@
 using ParallelTasks;
 using SharpDX.Mathematics.Interop;
 using SpaceEngineersVR.GUI;
-using SpaceEngineersVR.Player;
-using SpaceEngineersVR.Player.Components;
 using SpaceEngineersVR.Plugin;
 using SpaceEngineersVR.Wrappers;
 using System;

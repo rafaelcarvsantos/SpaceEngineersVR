@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using Sandbox.Game.Entities.Character;
 using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.World;
 using SpaceEngineersVR.Patches.TranspilerHelper;

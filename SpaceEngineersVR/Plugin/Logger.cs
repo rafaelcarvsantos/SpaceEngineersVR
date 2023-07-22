@@ -133,7 +133,7 @@ namespace SpaceEngineersVR.Plugin
 		private static string Format(Exception ex, string message, object[] data)
 		{
 			// Allocate a single StringBuilder object per thread
-			var sb = threadLocalStringBuilder.Value;
+			StringBuilder sb = threadLocalStringBuilder.Value;
 			if (sb == null)
 			{
 				sb = new StringBuilder();
@@ -152,7 +152,7 @@ namespace SpaceEngineersVR.Plugin
 
 			FormatException(sb, ex);
 
-			var text = sb.ToString();
+			string text = sb.ToString();
 			sb.Clear();
 
 			return text;
@@ -164,7 +164,7 @@ namespace SpaceEngineersVR.Plugin
 			if (ex == null)
 				return;
 
-			for (var i = 0; i < MaxExceptionDepth; i++)
+			for (int i = 0; i < MaxExceptionDepth; i++)
 			{
 				sb.Append("\r\n[");
 				sb.Append(ex.GetType().Name);
@@ -180,7 +180,7 @@ namespace SpaceEngineersVR.Plugin
 				if (ex.Data.Count > 0)
 				{
 					sb.Append("\r\nData:");
-					foreach (var key in ex.Data.Keys)
+					foreach (object key in ex.Data.Keys)
 					{
 						sb.Append("\r\n");
 						sb.Append(key);
@@ -201,7 +201,5 @@ namespace SpaceEngineersVR.Plugin
 
 			sb.Append($"WARNING: Not logging more than {MaxExceptionDepth} inner exceptions");
 		}
-
-
 	}
 }

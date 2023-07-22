@@ -9,10 +9,6 @@ namespace SpaceEngineersVR.Patches
 		public static void Patch()
 		{
 			//MyDefinitionManager.Static
-
-
-
 		}
-
 	}
 }

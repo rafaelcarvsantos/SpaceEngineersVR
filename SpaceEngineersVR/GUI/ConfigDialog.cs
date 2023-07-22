@@ -156,7 +156,7 @@ namespace SpaceEngineersVR.GUI
 				},
 			};
 
-			if(range is Config.Config.Slider<T> slider)
+			if (range is Config.Config.Slider<T> slider)
 			{
 				sliderControl.SnapSliderToSteps = true;
 				sliderControl.StepLength = get(slider.snap) / (sliderControl.MaxValue - sliderControl.MinValue);

@@ -1,6 +1,5 @@
 ﻿using Sandbox.Game.Entities.Character;
 using Sandbox.Game.Entities.Character.Components;
-using Sandbox.Game.Weapons;
 using Sandbox.Game.World;
 using SpaceEngineersVR.Plugin;
 using SpaceEngineersVR.Util;
@@ -205,7 +204,7 @@ namespace SpaceEngineersVR.Player.Components
 				UpdateHand(Player.Hands.left),
 				UpdateHand(Player.Hands.right));
 
-			if (hands.left != null) UpdateHandBones(hands.left.Value, armIKStartIndexes.left, handIndexes.left, HandExtraTransforms.left);
+			if (hands.left != null)  UpdateHandBones(hands.left.Value,  armIKStartIndexes.left,  handIndexes.left,  HandExtraTransforms.left);
 			if (hands.right != null) UpdateHandBones(hands.right.Value, armIKStartIndexes.right, handIndexes.right, HandExtraTransforms.right);
 
 			Hand? UpdateHand(Controller controller)
