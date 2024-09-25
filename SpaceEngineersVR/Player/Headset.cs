@@ -9,6 +9,8 @@ using SpaceEngineersVR.Plugin;
 using SpaceEngineersVR.Util;
 using SpaceEngineersVR.Wrappers;
 using System;
+using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using Valve.VR;
 using VRage;
@@ -29,8 +31,8 @@ namespace SpaceEngineersVR.Player
 
 		private readonly uint pnX;
 		private readonly uint pnY;
-		private readonly uint height;
-		private readonly uint width;
+		private uint height;
+		private uint width;
 
 		public Vector2I rawResolution => new Vector2I((int)width, (int)height);
 		public Vector2I scaledResolution => new Vector2I((int)(width * Main.Config.resolutionScale.value), (int)(height * Main.Config.resolutionScale.value));
@@ -40,7 +42,7 @@ namespace SpaceEngineersVR.Player
 
 		private VRTextureBounds_t imageBounds;
 
-		private bool enableNotifications = false;
+		private bool enableNotifications = true;
 
 		public Headset()
 			: base(actionName: "")
@@ -76,7 +78,9 @@ namespace SpaceEngineersVR.Player
 			MySandboxGame.Static.SwitchSettings(x);
 
 			Logger.Info($"Found headset with eye resolution of '{width}x{height}' and refresh rate of {refreshRate}");
-
+			Logger.Info("Changing eye resolution to default for Quest 3: 2064x2208");
+			width = 2064;
+			height = 2208;
 
 			MySession.AfterLoading += GameLoaded;
 		}
@@ -91,7 +95,7 @@ namespace SpaceEngineersVR.Player
 
 			void SetCamera(VRage.Game.ModAPI.Interfaces.IMyCameraController camera)
 			{
-				VRage.Game.Components.MyEntityComponentContainer components = camera?.Entity?.Components;
+				VRage.Game.Components.MyEntityComponentContainer components = (VRage.Game.Components.MyEntityComponentContainer)(camera?.Entity?.Components);
 				if (components == null)
 					return;
 
@@ -305,8 +309,8 @@ namespace SpaceEngineersVR.Player
 
 		public void CreatePopup(string message)
 		{
-			//System.Drawing.Bitmap img = new Bitmap(File.OpenRead(Common.IconPngPath));
-			//CreatePopup(EVRNotificationType.Transient, message, ref img);
+			System.Drawing.Bitmap img = new Bitmap(File.OpenRead(Assets.IconPngPath));
+			CreatePopup(EVRNotificationType.Transient, message, ref img);
 		}
 
 		public void CreatePopup(EVRNotificationType type, string message, ref System.Drawing.Bitmap bitmap)

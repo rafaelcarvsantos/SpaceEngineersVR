@@ -16,7 +16,7 @@ namespace SpaceEngineersVR.Plugin
 		{
 			myLog = new MyLog(true);
 			myLog.InitWithDate(Main.Name, new StringBuilder(Main.Version.ToString()), 7);
-			myLog.LogFlag(LoggingOptions.ALL);
+			myLog.Options = LoggingOptions.ALL;
 		}
 
 		public static bool IsTraceEnabled => MyLog.Default.LogEnabled;
