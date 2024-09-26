@@ -24,6 +24,7 @@ namespace SpaceEngineersVR.GUI
 			Player.Player.OnPlayerFloorChanged += RepositionOverlay;
 			Main.Config.uiDepth.onValueChanged += _ => RepositionOverlay();
 			Main.Config.uiWidth.onValueChanged += _ => RepositionOverlay();
+			Main.Config.uiCurvature.onValueChanged += _ => RepositionOverlay();
 		}
 
 		private static void RepositionOverlay()
@@ -38,7 +39,7 @@ namespace SpaceEngineersVR.GUI
 
 			OpenVR.Overlay.SetOverlayWidthInMeters(OverlayHandle, Main.Config.uiWidth.value * Main.Config.uiDepth.value);
 
-			OpenVR.Overlay.SetOverlayCurvature(OverlayHandle, 0.35f);
+			OpenVR.Overlay.SetOverlayCurvature(OverlayHandle, Main.Config.uiCurvature.value);
 		}
 
 		public static void Draw()

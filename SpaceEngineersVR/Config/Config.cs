@@ -64,6 +64,9 @@ namespace SpaceEngineersVR.Config
 		public Slider<float> uiWidth = new Slider<float>(0.1f, 2.5f, 2f, 0.01f,
 				v => $"UI Width ({v:0.00} meters)",
 				"Changes the size of the UI.");
+		public Slider<float> uiCurvature = new Slider<float>(0.1f, 0.4f, 0.25f, 0.01f,
+				v => $"UI curvature ({v:0.00})",
+				"Changes the curvature of the UI.");
 
 
 		private IEnumerable<IValue> values()

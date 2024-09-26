@@ -81,6 +81,8 @@ namespace SpaceEngineersVR.GUI
 				v => v, v => v);
 			CreateSlider(config.uiWidth,
 				v => v, v => v);
+			CreateSlider(config.uiCurvature,
+				v => v, v => v);
 
 
 			AddCaption(Caption);
