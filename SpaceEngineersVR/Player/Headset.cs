@@ -78,9 +78,9 @@ namespace SpaceEngineersVR.Player
 			MySandboxGame.Static.SwitchSettings(x);
 
 			Logger.Info($"Found headset with eye resolution of '{width}x{height}' and refresh rate of {refreshRate}");
-			Logger.Info("Changing eye resolution to default for Quest 3: 2064x2208");
-			width = 2064;
-			height = 2208;
+			Logger.Info($"Changing eye resolution to : {MyRender11.Resolution.X}x{MyRender11.Resolution.Y}");
+			width = (uint)MyRender11.Resolution.X;
+			height = (uint)MyRender11.Resolution.Y;
 
 			MySession.AfterLoading += GameLoaded;
 		}
@@ -117,7 +117,7 @@ namespace SpaceEngineersVR.Player
 			{
 				//TODO: Listen to Main.Config.resolutionScale.onValueChanged and update rendering stuff
 
-				MyRender11.Resolution = new Vector2I(scaledResolution.X, scaledResolution.Y);
+				//MyRender11.Resolution = new Vector2I(scaledResolution.X, scaledResolution.Y);
 				MyRender11.CreateScreenResources();
 				firstUpdate = false;
 				return;
