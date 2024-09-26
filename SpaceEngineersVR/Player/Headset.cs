@@ -336,7 +336,8 @@ namespace SpaceEngineersVR.Player
 				m_nBytesPerPixel = 4
 			};
 			// FIXME: Notification on overlay
-			//OpenVR..CreateNotification(handle, 0, type, message, EVRNotificationStyle.Application, ref image, ref id);
+			uint id = 0;
+			OpenVR.Notifications.CreateNotification(handle, 0, type, message, EVRNotificationStyle.Application, ref image, ref id);
 			Logger.Debug("Pop-up created with message: " + message);
 
 			bitmap.UnlockBits(textureData);

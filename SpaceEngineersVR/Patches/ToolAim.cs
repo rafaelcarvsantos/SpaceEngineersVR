@@ -87,13 +87,13 @@ namespace SpaceEngineersVR.Patches
 				if (hitInfo != null)
 				{
 					__result = hitInfo.Value.Position;
-					//Util.Util.DrawDebugLine(position, __result, Color.Yellow);
+					if(Main.Config.debug.value) Util.Util.DrawDebugLine(position, __result, Color.Yellow);
 					return false;
 				}
 			}
 
 			__result = (__instance.WeaponPosition != null) ? (__instance.WeaponPosition.LogicalPositionWorld + forward * 25000.0) : (position + forward * 25000.0);
-			//Util.Util.DrawDebugLine(position, __result, Color.Red);
+			if(Main.Config.debug.value) Util.Util.DrawDebugLine(position, __result, Color.Red);
 			return false;
 		}
 

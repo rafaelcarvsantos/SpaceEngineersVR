@@ -68,6 +68,10 @@ namespace SpaceEngineersVR.Config
 				v => $"UI curvature ({v:0.00})",
 				"Changes the curvature of the UI.");
 
+		public Value<bool> debug = new Value<bool>(false,
+			_ => "Enable Debug",
+			"Used for development. If you dont know what it is then leave it unchecked.");
+
 
 		private IEnumerable<IValue> values()
 		{

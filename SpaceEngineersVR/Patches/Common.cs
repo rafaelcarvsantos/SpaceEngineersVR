@@ -2,6 +2,7 @@
 using Sandbox.Game.Entities.Character;
 using SpaceEngineersVR.Patches.TranspilerHelper;
 using SpaceEngineersVR.Player.Components;
+using SpaceEngineersVR.Plugin;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -38,7 +39,8 @@ namespace SpaceEngineersVR.Patches
 		{
 			MatrixD result = GetActiveHand(character)?.world ?? character.GetHeadMatrix(includeY, includeX, forceHeadAnim, forceHeadBone, preferLocalOverSync);
 
-			//Util.Util.DrawDebugMatrix(result, "Hand");
+			if(Main.Config.debug.value)
+				Util.Util.DrawDebugMatrix(result, "Hand");
 
 			return result;
 		}

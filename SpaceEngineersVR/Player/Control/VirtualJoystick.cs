@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Sandbox.Game.World;
+using SpaceEngineersVR.Player.Components;
+using SpaceEngineersVR.Plugin;
+using System;
 using VRageMath;
 
 namespace SpaceEngineersVR.Player.Control
@@ -47,10 +50,13 @@ namespace SpaceEngineersVR.Player.Control
 		public void Update()
 		{
 			enableButton.Update();
-
-			//VRBodyComponent vrBody = MySession.Static.LocalCharacter?.Components.Get<VRBodyComponent>();
-			//if(vrBody != null)
-			//	Util.Util.DrawDebugMatrix(startPosToAbsolute.matrix * Player.PlayerToAbsolute.inverted * vrBody.playerToCharacter.matrix * vrBody.Character.WorldMatrix, "Virtual Joystick");
+			VRBodyComponent vrBody = null;
+			if (Main.Config.debug.value)
+			{
+				vrBody = MySession.Static.LocalCharacter?.Components.Get<VRBodyComponent>();
+				if(vrBody != null)
+					Util.Util.DrawDebugMatrix(startPosToAbsolute.matrix * Player.PlayerToAbsolute.inverted * vrBody.playerToCharacter.matrix * vrBody.Character.WorldMatrix, "Virtual Joystick");
+			}
 
 			Matrix stick = device.pose.deviceToAbsolute.matrix;
 			(stick.Forward, stick.Up) = (stick.Down, stick.Forward);
@@ -69,9 +75,9 @@ namespace SpaceEngineersVR.Player.Control
 				Matrix stickToStart = stick * startPosToAbsolute.inverted;
 				Matrix stickDelta = stickToStart * lastFramePosToStart.inverted;
 				lastFramePosToStart = new Util.MatrixAndInvert(stickToStart);
-
-				//if (vrBody != null)
-				//	Util.Util.DrawDebugMatrix(stick * Player.PlayerToAbsolute.inverted * vrBody.playerToCharacter.matrix * vrBody.Character.WorldMatrix);
+				
+				if (vrBody != null)
+					Util.Util.DrawDebugMatrix(stick * Player.PlayerToAbsolute.inverted * vrBody.playerToCharacter.matrix * vrBody.Character.WorldMatrix);
 
 				Vector3 newPosition = Vector3.Zero;
 				Vector3 newDelta = Vector3.Zero;

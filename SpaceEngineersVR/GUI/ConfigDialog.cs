@@ -84,6 +84,8 @@ namespace SpaceEngineersVR.GUI
 			CreateSlider(config.uiCurvature,
 				v => v, v => v);
 
+			CreateCheckbox(config.debug);
+
 
 			AddCaption(Caption);
 
