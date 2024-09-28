@@ -56,6 +56,7 @@ namespace SpaceEngineersVR.Plugin
 
 		public void Dispose()
 		{
+			Logger.Debug("Main#Dispose() called.\t Failed: "+Failed);
 			if (!Failed)
 			{
 				try
@@ -68,6 +69,7 @@ namespace SpaceEngineersVR.Plugin
 					Logger.Critical(ex, "Dispose failed");
 				}
 			}
+			Logger.Debug("Main#Dispose() end.");
 		}
 
 		public void LoadAssets(string folder)
@@ -108,10 +110,9 @@ namespace SpaceEngineersVR.Plugin
 			Logger.Info("Starting Steam OpenVR");
 			EVRInitError error = EVRInitError.None;
 			OpenVR.Init(ref error, EVRApplicationType.VRApplication_Scene);
-			Logger.Error($"Booting error = {error}");
-
 			if (error != EVRInitError.None)
 			{
+				Logger.Error($"Booting error = {error}");
 				Logger.Critical("Failed to connect to SteamVR!");
 				return false;
 			}
@@ -125,7 +126,7 @@ namespace SpaceEngineersVR.Plugin
 			MyPerGameSettings.BasicGameInfo.GameAcronym = Common.ShortName;
 			*/
 
-			Logger.Info("Patching game");
+			Logger.Info("Patching game.");
 			Harmony = new Harmony(Name);
 			Harmony.PatchAll(Assembly.GetExecutingAssembly());
 
@@ -133,10 +134,11 @@ namespace SpaceEngineersVR.Plugin
 
 			MySession.AfterLoading += AfterLoadedWorld;
 			MySession.OnUnloading += UnloadingWorld;
+			MySession.OnUnloaded += UnloadedWorld;
 
 			DesktopResolution = MyRender11.Resolution;
 
-			Logger.Info("Finalizing...");
+			Logger.Info("Finished main initialization.");
 			return true;
 		}
 
@@ -166,9 +168,25 @@ namespace SpaceEngineersVR.Plugin
 
 		public void UnloadingWorld()
 		{
-			MyRender11.Resolution = DesktopResolution;
+			//MyRender11.Resolution = DesktopResolution;
 			Logger.Info("Unloading SE game");
 			Player.Player.Headset.CreatePopup("Unloaded Game");
+		}
+
+		public void UnloadedWorld()
+		{
+			Logger.Debug("Main#UnloadedWorld start.");
+			
+/*			OpenVR.Shutdown();
+			EVRInitError error = EVRInitError.None;
+			OpenVR.Init(ref error, EVRApplicationType.VRApplication_Scene);
+			if (error != EVRInitError.None)
+			{
+				Logger.Error($"Booting error = {error}");
+			}
+			Harmony = new Harmony(Name);
+			Harmony.PatchAll(Assembly.GetExecutingAssembly());*/
+			Logger.Debug("Main#UnloadedWorld end.");
 		}
 	}
 }

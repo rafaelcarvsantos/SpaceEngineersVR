@@ -4,6 +4,7 @@ using Sandbox.Game.Entities.Character.Components;
 using Sandbox.Game.Screens.Helpers.RadialMenuActions;
 using Sandbox.Game.SessionComponents.Clipboard;
 using Sandbox.Game.World;
+using SpaceEngineersVR.Plugin;
 using System.Runtime.CompilerServices;
 using VRage.Game;
 using VRage.Game.ModAPI;
@@ -42,8 +43,10 @@ namespace SpaceEngineersVR.Player.Components
 
 		public override void Init(MyComponentDefinitionBase definition)
 		{
+			Logger.Debug("Initiate VR Movement component? : " + Character.InScene);
 			if (Character.InScene)
 			{
+				Logger.Debug("Initiating VR Movement component.");
 				Init();
 			}
 		}

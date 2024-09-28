@@ -79,6 +79,7 @@ namespace SpaceEngineersVR.Player.Components
 
 		static VRBodyComponent()
 		{
+			Logger.Debug("Creating VR Body Component");
 			MySession.AfterLoading += GameLoaded;
 		}
 

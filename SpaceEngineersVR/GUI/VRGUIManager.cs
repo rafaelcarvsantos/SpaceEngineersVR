@@ -16,6 +16,7 @@ namespace SpaceEngineersVR.GUI
 
 		static VRGUIManager()
 		{
+			Logger.Debug("Creating VR GUI manager");
 			OpenVR.Overlay.CreateOverlay("SEVR_DEBUG_OVERLAY", "SEVR_DEBUG_OVERLAY", ref OverlayHandle);
 			OpenVR.Overlay.ShowOverlay(OverlayHandle);
 

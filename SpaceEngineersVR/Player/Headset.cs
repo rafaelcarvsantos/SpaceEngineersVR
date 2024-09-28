@@ -47,6 +47,8 @@ namespace SpaceEngineersVR.Player
 		public Headset()
 			: base(actionName: "")
 		{
+			Logger.Debug("Creating Headset object");
+
 			deviceId = OpenVR.k_unTrackedDeviceIndex_Hmd;
 
 			OpenVR.ExtendedDisplay.GetEyeOutputViewport(EVREye.Eye_Left, ref pnX, ref pnY, ref width, ref height);
@@ -64,6 +66,7 @@ namespace SpaceEngineersVR.Player
 
 			ETrackedPropertyError error = ETrackedPropertyError.TrackedProp_Success;
 			int refreshRate = (int)Math.Ceiling(OpenVR.System.GetFloatTrackedDeviceProperty(0, ETrackedDeviceProperty.Prop_DisplayFrequency_Float, ref error));
+			if (refreshRate == 121 || refreshRate == 119) refreshRate = 120;
 			if (error != ETrackedPropertyError.TrackedProp_Success)
 			{
 				Logger.Critical("Failed to get HMD refresh rate! defaulting to 80");
@@ -87,13 +90,14 @@ namespace SpaceEngineersVR.Player
 
 		private void GameLoaded()
 		{
-			SetCamera(MySession.Static.CameraController);
+			Logger.Debug("Headset#GameLoaded() start");
+			FetchObjectCameraIsAttachedTo(MySession.Static.CameraController);
 			MySession.Static.CameraAttachedToChanged += (oldCamera, newCamera) =>
 			{
-				SetCamera(newCamera);
+				FetchObjectCameraIsAttachedTo(newCamera);
 			};
 
-			void SetCamera(VRage.Game.ModAPI.Interfaces.IMyCameraController camera)
+			void FetchObjectCameraIsAttachedTo(VRage.Game.ModAPI.Interfaces.IMyCameraController camera)
 			{
 				VRage.Game.Components.MyEntityComponentContainer components = (VRage.Game.Components.MyEntityComponentContainer)(camera?.Entity?.Components);
 				if (components == null)
@@ -104,6 +108,7 @@ namespace SpaceEngineersVR.Player
 					SetBodyComponent(body);
 				}
 			}
+			Logger.Debug("Headset#GameLoaded() end");
 		}
 
 		#region DrawingLogic
@@ -172,6 +177,7 @@ namespace SpaceEngineersVR.Player
 				handle = texture2D.NativePointer
 			};
 			OpenVR.Compositor.Submit(eye, ref input, ref imageBounds, EVRSubmitFlags.Submit_Default);
+			
 		}
 
 		private void LoadEnviromentMatrices(EVREye eye, MatrixD viewMatrix, ref EnvironmentMatrices envMats)
@@ -315,6 +321,7 @@ namespace SpaceEngineersVR.Player
 
 		public void CreatePopup(EVRNotificationType type, string message, ref System.Drawing.Bitmap bitmap)
 		{
+			Logger.Debug($"Trying to create pop-up. Message: {message} \t enableNotifications: {enableNotifications}");
 			if (!enableNotifications)
 				return;
 
@@ -338,9 +345,9 @@ namespace SpaceEngineersVR.Player
 			// FIXME: Notification on overlay
 			uint id = 0;
 			OpenVR.Notifications.CreateNotification(handle, 0, type, message, EVRNotificationStyle.Application, ref image, ref id);
-			Logger.Debug("Pop-up created with message: " + message);
 
 			bitmap.UnlockBits(textureData);
+			Logger.Debug("Pop-up created with message: " + message);
 		}
 
 		/// <summary>

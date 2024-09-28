@@ -66,6 +66,7 @@ namespace SpaceEngineersVR.Player
 
 		static Player()
 		{
+			Logger.Debug("Creating Player object.");
 			AllDevices.Add(Headset);
 			AllDevices.Add(Hands.left);
 			AllDevices.Add(Hands.right);

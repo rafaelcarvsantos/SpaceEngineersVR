@@ -29,6 +29,7 @@ namespace SpaceEngineersVR.GUI
 
 		public ConfigDialog() : base(new Vector2(0.5f, 0.5f), MyGuiConstants.SCREEN_BACKGROUND_COLOR, new Vector2(0.7f, 0.8f), false, null, MySandboxGame.Config.UIBkOpacity, MySandboxGame.Config.UIOpacity)
 		{
+			Logger.Debug("Initializing plugin config dialog.");
 			EnabledBackgroundFade = true;
 			m_closeOnEsc = true;
 			m_drawEvenWithoutFocus = true;
@@ -52,6 +53,7 @@ namespace SpaceEngineersVR.GUI
 
 		private void CreateControls()
 		{
+			Logger.Debug("Creating controls of plugin settings.");
 			Config.Config config = Main.Config;
 
 			configControls.Clear();
@@ -112,6 +114,7 @@ namespace SpaceEngineersVR.GUI
 			MyGuiControlButton closeButton = new MyGuiControlButton(originAlign: MyGuiDrawAlignEnum.HORISONTAL_RIGHT_AND_VERTICAL_CENTER, text: MyTexts.Get(MyCommonTexts.Ok), onButtonClick: OnOk);
 			layoutTable.Add(closeButton, MyAlignH.Center, MyAlignV.Center, row, 0, colSpan: 2);
 			row++;
+			Logger.Debug("Creating controls of plugin settings done!");
 		}
 
 		private void OnOk(MyGuiControlButton _) => CloseScreen();

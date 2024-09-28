@@ -15,6 +15,8 @@ namespace SpaceEngineersVR.Patches
 	{
 		static HandInteraction()
 		{
+			Logger.Info("Starting applying harmony injections for hand interactions.");
+
 			HarmonyMethod doDetectionPrefix = new HarmonyMethod(typeof(HandInteraction), nameof(Prefix_DoDetection));
 			HarmonyMethod doDetectionTranspiler = new HarmonyMethod(typeof(HandInteraction), nameof(Transpiler_DoDetection));
 			Common.Harmony.Patch(AccessTools.Method(typeof(MyCharacterRaycastDetectorComponent), "DoDetection"), prefix: doDetectionPrefix, transpiler: doDetectionTranspiler);

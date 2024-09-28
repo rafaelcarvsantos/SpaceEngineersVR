@@ -1,3 +1,4 @@
+using SpaceEngineersVR.Plugin;
 using System;
 using VRage.Game;
 using VRage.Game.Components;
@@ -16,7 +17,12 @@ namespace SpaceEngineersVR.Patches
 
 		public override void Init(MyObjectBuilder_SessionComponent sessionComponent)
 		{
+			Logger.Debug("Custom simulation updater initializing.");
+		}
 
+		~SimulationUpdater()
+		{
+			Logger.Debug("Destructing custom simulation updater.");
 		}
 
 		public override void BeforeStart()
@@ -41,6 +47,7 @@ namespace SpaceEngineersVR.Patches
 
 		protected override void UnloadData()
 		{
+			Logger.Debug("Custom simulation updater UnloadData called.");
 			OnWorldUnload?.Invoke();
 		}
 	}

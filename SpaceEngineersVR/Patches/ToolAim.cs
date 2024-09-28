@@ -17,6 +17,8 @@ namespace SpaceEngineersVR.Patches
 	{
 		static ToolAim()
 		{
+			Logger.Info("Starting applying harmony tool aiming injections.");
+
 			Common.Harmony.Patch(AccessTools.Method(typeof(MyCharacterWeaponPositionComponent), "UpdateGraphicalWeaponPosition"), prefix: new HarmonyMethod(typeof(ToolAim), nameof(Prefix_UpdateGraphicalWeaponPosition)));
 			Common.Harmony.Patch(AccessTools.Method(typeof(MyCharacterWeaponPositionComponent), "UpdateLogicalWeaponPosition"), prefix: new HarmonyMethod(typeof(ToolAim), nameof(Prefix_UpdateLogicalWeaponPosition)));
 			Common.Harmony.Patch(AccessTools.Method(typeof(MyCharacter), "GetAimedPointFromCamera"), prefix: new HarmonyMethod(typeof(ToolAim), nameof(Prefix_GetAimedPointFromCamera)));

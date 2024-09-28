@@ -1,5 +1,7 @@
-﻿using Sandbox.Game.Gui;
+﻿
+using Sandbox.Game.Gui;
 using Sandbox.Graphics;
+using SpaceEngineersVR.Plugin;
 using VRage.Input;
 using VRageMath;
 using VRageRender;
@@ -10,10 +12,16 @@ namespace SpaceEngineersVR.GUI
 	{
 		public MouseOverlay() : base(new Vector2(0.5f, 0.5f), default(Vector2), null, isTopMostScreen: true)
 		{
+			Logger.Debug("Creating mouse overlay.");
 			m_isTopMostScreen = true;
 			m_drawEvenWithoutFocus = true;
 			CanHaveFocus = false;
 			m_canShareInput = false;
+		}
+
+		~MouseOverlay()
+		{
+			Logger.Debug("Destructing mouse overlay.");
 		}
 
 		public override bool Draw()

@@ -5,6 +5,9 @@ using SpaceEngineersVR.GUI;
 using SpaceEngineersVR.Plugin;
 using SpaceEngineersVR.Wrappers;
 using System;
+using System.Diagnostics;
+using System.Text;
+using Valve.VR;
 using VRage.Profiler;
 using VRageMath;
 using VRageRender;
@@ -18,6 +21,7 @@ namespace SpaceEngineersVR.Patches
 
 		static FrameInjections()
 		{
+			Logger.Info("Starting applying harmony frame injections.");
 			Type t = AccessTools.TypeByName("VRageRender.MyRender11");
 
 			Common.Harmony.Patch(AccessTools.Method(t, "Present"), prefix: new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_Present)));
@@ -25,6 +29,7 @@ namespace SpaceEngineersVR.Patches
 			Common.Harmony.Patch(AccessTools.Method(t, "Draw"), prefix: new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_Draw)));
 
 			Common.Harmony.Patch(AccessTools.Method(t, "DrawScene"), prefix: new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_DrawScene)));
+
 
 			Common.Harmony.Patch(AccessTools.Method(t, "RenderMainSprites", new Type[0]),
 				prefix: new HarmonyMethod(typeof(FrameInjections), nameof(Prefix_RenderMainSprites)),
@@ -41,7 +46,20 @@ namespace SpaceEngineersVR.Patches
 		private static bool Prefix_Draw()
 		{
 			Player.Player.RenderUpdate();
+			StringBuilder builder = new StringBuilder();
+			builder.AppendLine("MyRenderer11 state: ");
+			builder.AppendLine("\t Backbuffer: " + MyRender11.Backbuffer.ToString());
+			builder.AppendLine("\t DebugOverrides: " + MyRender11.DebugOverrides.ToString());
+			builder.AppendLine("\t Environment_Matrices: " + MyRender11.Environment_Matrices.ToString());
+			builder.AppendLine("\t MainSpritesTask: " + MyRender11.MainSpritesTask.ToString());
+			builder.AppendLine("\t m_DrawScene: " + MyRender11.m_DrawScene.ToString());
+			builder.AppendLine("\t m_Settings: " + MyRender11.m_Settings.ToString());
+			builder.AppendLine("\t RC: " + MyRender11.RC.ToString());
+			builder.AppendLine("\t Resolution: " + MyRender11.Resolution.ToString());
+			builder.AppendLine("\t Settings: " + MyRender11.Settings.ToString());
+			builder.AppendLine("\t ViewportResolution: " + MyRender11.ViewportResolution.ToString());
 
+			Logger.Debug(builder.ToString());
 			return true;
 		}
 
