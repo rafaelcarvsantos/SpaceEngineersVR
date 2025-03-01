@@ -536,8 +536,6 @@
     <Compile Include="GUI\MouseOverlay.cs" />
     <Compile Include="Patches\TranspilerHelper.cs" />
     <Compile Include="Patches\Common.cs" />
-    <Compile Include="Patches\ToolAim.cs" />
-    <Compile Include="Patches\HandInteraction.cs" />
     <Compile Include="Patches\ModelPatcher.cs" />
     <Compile Include="Player\BodyCalibration.cs" />
     <Compile Include="Player\Control\Analog.cs" />

@@ -137,54 +137,54 @@ namespace SpaceEngineersVR.Player.Components
 		{
 			Logger.Debug("Initalizing VR hands");
 
-			MyCharacterBone[] bones = Character.AnimationController.CharacterBones;
+			//MyCharacterBone[] bones = Character.AnimationController.CharacterBones;
 
-			MyCharacterBone headBone = bones[Character.HeadBoneIndex];
-			Vector3 headPos = headBone.GetAbsoluteRigTransform().Translation;
+			//MyCharacterBone headBone = bones[Character.HeadBoneIndex];
+			//Vector3 headPos = headBone.GetAbsoluteRigTransform().Translation;
 
-			characterCalibration.height = headPos.Y;
+			//characterCalibration.height = headPos.Y;
 
-			handIndexes = new Handed<int>(
-				(int)HandIndexFields.left.GetValue(Character),
-				(int)HandIndexFields.right.GetValue(Character));
+			//handIndexes = new Handed<int>(
+			//	(int)HandIndexFields.left.GetValue(Character),
+			//	(int)HandIndexFields.right.GetValue(Character));
 
-			armIKStartIndexes = new Handed<int>(
-				(int)ArmIKStartIndexFields.left.GetValue(Character),
-				(int)ArmIKStartIndexFields.right.GetValue(Character));
+			//armIKStartIndexes = new Handed<int>(
+			//	(int)ArmIKStartIndexFields.left.GetValue(Character),
+			//	(int)ArmIKStartIndexFields.right.GetValue(Character));
 
-			Handed<MyCharacterBone> handBones = new Handed<MyCharacterBone>(
-				handIndexes.left >= 0 ? bones[handIndexes.left] : null,
-				handIndexes.right >= 0 ? bones[handIndexes.right] : null);
+			//Handed<MyCharacterBone> handBones = new Handed<MyCharacterBone>(
+			//	handIndexes.left >= 0 ? bones[handIndexes.left] : null,
+			//	handIndexes.right >= 0 ? bones[handIndexes.right] : null);
 
-			Handed<MyCharacterBone> shoulders = new Handed<MyCharacterBone>(
-				armIKStartIndexes.left >= 0 ? bones[armIKStartIndexes.left] : null,
-				armIKStartIndexes.right >= 0 ? bones[armIKStartIndexes.right] : null);
+			//Handed<MyCharacterBone> shoulders = new Handed<MyCharacterBone>(
+			//	armIKStartIndexes.left >= 0 ? bones[armIKStartIndexes.left] : null,
+			//	armIKStartIndexes.right >= 0 ? bones[armIKStartIndexes.right] : null);
 
-			Handed<float> lengths = new Handed<float>(
-				CalculateArmLength(handBones.left, shoulders.left),
-				CalculateArmLength(handBones.right, shoulders.right));
+			//Handed<float> lengths = new Handed<float>(
+			//	CalculateArmLength(handBones.left, shoulders.left),
+			//	CalculateArmLength(handBones.right, shoulders.right));
 
-			float shoulderWidth = Vector3.Distance(shoulders.left.GetAbsoluteRigTransform().Translation, shoulders.right.GetAbsoluteRigTransform().Translation);
+			//float shoulderWidth = Vector3.Distance(shoulders.left.GetAbsoluteRigTransform().Translation, shoulders.right.GetAbsoluteRigTransform().Translation);
 
-			characterCalibration.armSpan = lengths.left + lengths.right + shoulderWidth;
+			//characterCalibration.armSpan = lengths.left + lengths.right + shoulderWidth;
 
-			float CalculateArmLength(MyCharacterBone hand, MyCharacterBone shoulder)
-			{
-				float totalLength = 0;
-				for (MyCharacterBone bone = hand; bone != shoulder; bone = bone.Parent)
-				{
-					totalLength += bone.BindTransform.Translation.Length();
-				}
-				return totalLength;
-			}
+			//float CalculateArmLength(MyCharacterBone hand, MyCharacterBone shoulder)
+			//{
+			//	float totalLength = 0;
+			//	for (MyCharacterBone bone = hand; bone != shoulder; bone = bone.Parent)
+			//	{
+			//		totalLength += bone.BindTransform.Translation.Length();
+			//	}
+			//	return totalLength;
+			//}
 
-			Player.OnPlayerCalibrationChanged += RecalculatePlayerScale;
-			RecalculatePlayerScale(Player.GetBodyCalibration());
+			//Player.OnPlayerCalibrationChanged += RecalculatePlayerScale;
+			//RecalculatePlayerScale(Player.GetBodyCalibration());
 		}
 
 		private void RecalculatePlayerScale(BodyCalibration playerCalibration)
 		{
-			playerToCharacter = new MatrixAndInvert(ScalingModes[Main.Config.bodyScalingModeIndex.value].method(playerCalibration, characterCalibration));
+			//playerToCharacter = new MatrixAndInvert(ScalingModes[Main.Config.bodyScalingModeIndex.value].method(playerCalibration, characterCalibration));
 		}
 
 		public override void OnCharacterDead()
@@ -193,37 +193,37 @@ namespace SpaceEngineersVR.Player.Components
 
 		public override void UpdateBeforeSimulation()
 		{
-			MatrixD charHeadMatrix = Character.GetHeadMatrix(false);
+			//MatrixD charHeadMatrix = Character.GetHeadMatrix(false);
 
-			Matrix aimOffset;
-			if (Character.CurrentWeapon != null) //TODO: Custom offsets for each weapon/tool, preferably with an easy in game way to adjust it for modded weapons/tools
-				aimOffset = Matrix.CreateRotationX(Main.Config.handAimPitch.value.radians) * Matrix.CreateRotationZ(Main.Config.handAimYaw.value.radians);
-			else
-				aimOffset = Matrix.CreateRotationX(Main.Config.handActivationPitch.value.radians) * Matrix.CreateRotationZ(Main.Config.handActivationYaw.value.radians);
+			//Matrix aimOffset;
+			//if (Character.CurrentWeapon != null) //TODO: Custom offsets for each weapon/tool, preferably with an easy in game way to adjust it for modded weapons/tools
+			//	aimOffset = Matrix.CreateRotationX(Main.Config.handAimPitch.value.radians) * Matrix.CreateRotationZ(Main.Config.handAimYaw.value.radians);
+			//else
+			//	aimOffset = Matrix.CreateRotationX(Main.Config.handActivationPitch.value.radians) * Matrix.CreateRotationZ(Main.Config.handActivationYaw.value.radians);
 
-			hands = new Handed<Hand?>(
-				UpdateHand(Player.Hands.left),
-				UpdateHand(Player.Hands.right));
+			//hands = new Handed<Hand?>(
+			//	UpdateHand(Player.Hands.left),
+			//	UpdateHand(Player.Hands.right));
 
-			if (hands.left != null)  UpdateHandBones(hands.left.Value,  armIKStartIndexes.left,  handIndexes.left,  HandExtraTransforms.left);
-			if (hands.right != null) UpdateHandBones(hands.right.Value, armIKStartIndexes.right, handIndexes.right, HandExtraTransforms.right);
+			//if (hands.left != null)  UpdateHandBones(hands.left.Value,  armIKStartIndexes.left,  handIndexes.left,  HandExtraTransforms.left);
+			//if (hands.right != null) UpdateHandBones(hands.right.Value, armIKStartIndexes.right, handIndexes.right, HandExtraTransforms.right);
 
-			Hand? UpdateHand(Controller controller)
-			{
-				if (!controller.pose.isTracked)
-					return null;
+			//Hand? UpdateHand(Controller controller)
+			//{
+			//	if (!controller.pose.isTracked)
+			//		return null;
 
-				Matrix local = aimOffset * controller.deviceToAbsolute.matrix * Player.NeutralHeadToAbsolute.inverted * playerToCharacter.matrix;
-				local.Orthogonalize();
-				MatrixD world = local * charHeadMatrix;
+			//	Matrix local = aimOffset * controller.deviceToAbsolute.matrix * Player.NeutralHeadToAbsolute.inverted * playerToCharacter.matrix;
+			//	local.Orthogonalize();
+			//	MatrixD world = local * charHeadMatrix;
 
-				return new Hand(world, local);
-			}
+			//	return new Hand(world, local);
+			//}
 
-			void UpdateHandBones(in Hand hand, int ikStartIndex, int handBoneIndex, Matrix extraMatrix)
-			{
-				CalculateHandIK.Invoke(Character, new object[] { ikStartIndex, handBoneIndex, extraMatrix * hand.world });
-			}
+			//void UpdateHandBones(in Hand hand, int ikStartIndex, int handBoneIndex, Matrix extraMatrix)
+			//{
+			//	CalculateHandIK.Invoke(Character, new object[] { ikStartIndex, handBoneIndex, extraMatrix * hand.world });
+			//}
 		}
 
 		public override string ComponentTypeDebugString => "VR Body Component";
